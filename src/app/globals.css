@@ -9,12 +9,16 @@
 
   /* 10% */
   --app-accent: #047857;
+   --app-surface: #ffffff;
+  --app-surface-muted: #f1f5f9;
 }
 
 @theme inline {
   --color-background: var(--app-background);
   --color-primary: var(--app-primary);
   --color-accent: var(--app-accent);
+  --color-surface: var(--app-surface)
+  --color-surface-muted: var(--app-surface-muted)
 }
 
 

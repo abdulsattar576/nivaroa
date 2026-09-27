@@ -1,4 +1,5 @@
-import { FooterSection } from "./type"
+import { Mail, Phone } from "lucide-react"
+import { FooterSection,SocialMediaIcons } from "./type"
 export const footersection:FooterSection[]=[
 {
     heading:"Shop",
@@ -10,6 +11,14 @@ export const footersection:FooterSection[]=[
         {
             name:"Women",
             link:"/shop/women"
+        },
+        {
+            name:"Clothes",
+            link:"/shop/clothes"
+        },
+        {
+            name:"Electronics",
+            link:"/shop/electronics"
         }
     ]
 },
@@ -24,10 +33,42 @@ export const footersection:FooterSection[]=[
             name:"About",
             link:"/about"
         },
+         
         {
-            name:"contact-us",
-            link:"/contact-us"
+            name:"Services",
+           link: "/services"
+        }
+    ]
+},
+{
+    heading:"Policy",
+    links:[
+        {
+            name:"Payment Information",
+            link:"/payment-info"
+        },
+        {
+            name:"Privacy Policy",
+            link:"/privacy-policy"
+        },
+        {
+            name:"Replacement & Warranty",
+            link:"/replacement-and-warranty"
+        },
+        {
+            name:"Warrenty by Nivaroa",
+            link:"/nivaroa-warrenty"
         }
     ]
 }
+]
+export const socialData:SocialMediaIcons[]=[
+    {
+       icon:Phone,
+       value:"+923039391913" 
+    },
+    {
+        icon:Mail,
+        value:"Nivaroa@gmail.com"
+    }
 ]
