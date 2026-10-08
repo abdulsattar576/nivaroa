@@ -1,28 +1,62 @@
 @import "tailwindcss";
 
 :root {
-  /* 60% */
+  /* =========================
+     60% — Background / Surfaces
+     ========================= */
   --app-background: #f8fafc;
-
-  /* 30% */
-  --app-primary: #0f172a;
-
-  /* 10% */
-  --app-accent: #047857;
-   --app-surface: #ffffff;
+  --app-surface: #ffffff;
   --app-surface-muted: #f1f5f9;
+
+  /* =========================
+     30% — Primary / Structure
+     ========================= */
+  --app-primary: #0f172a;
+  --app-primary-hover: #1e293b;
+  --app-primary-soft: #e2e8f0;
+
+  /* =========================
+     10% — Accent / Actions
+     ========================= */
+  --app-accent: #047857;
+  --app-accent-hover: #065f46;
+  --app-accent-soft: #d1fae5;
+
+  /* =========================
+     Text
+     ========================= */
+  --app-text: #0f172a;
+  --app-text-muted: #475569;
+  --app-text-on-dark: #ffffff;
+
+  /* =========================
+     Borders
+     ========================= */
+  --app-border: #cbd5e1;
+  --app-border-light: #e2e8f0;
 }
 
 @theme inline {
   --color-background: var(--app-background);
+
+  --color-surface: var(--app-surface);
+  --color-surface-muted: var(--app-surface-muted);
+
   --color-primary: var(--app-primary);
+  --color-primary-hover: var(--app-primary-hover);
+  --color-primary-soft: var(--app-primary-soft);
+
   --color-accent: var(--app-accent);
-  --color-surface: var(--app-surface)
-  --color-surface-muted: var(--app-surface-muted)
+  --color-accent-hover: var(--app-accent-hover);
+  --color-accent-soft: var(--app-accent-soft);
+
+  --color-text: var(--app-text);
+  --color-text-muted: var(--app-text-muted);
+  --color-text-on-dark: var(--app-text-on-dark);
+
+  --color-border: var(--app-border);
+  --color-border-light: var(--app-border-light);
 }
-
-
- 
 
 html {
   scroll-behavior: smooth;
@@ -31,20 +65,12 @@ html {
 body {
   min-height: 100vh;
   background: var(--color-background);
-  color: var(--color-primary);
-
+  color: var(--color-text);
   font-family: Arial, Helvetica, sans-serif;
   line-height: 1.5;
 }
-
-
- 
 
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
-
-
- 
- 

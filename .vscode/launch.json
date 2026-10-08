@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Create Supabase Admin",
+      "program": "${workspaceFolder}/scripts/create-admin.mjs",
+      "envFile": "${workspaceFolder}/.env.local",
+      "console": "integratedTerminal",
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    }
+  ]
+}
