@@ -2,11 +2,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight, Leaf } from "lucide-react";
 import { Images } from "@/constant/Image";
-import { footersection } from "./footer";
+import { buildFooterSections } from "./footer";
 import SocialMedia from "./Social.media";
+import { getCachedCategories } from "@/features/categories/data/categories";
 
-const Footer = () => {
+const Footer = async () => {
     const { logo } = Images;
+    const categories = await getCachedCategories();
+    const footerSections = buildFooterSections(categories);
 
     return (
         <footer className="mt-auto bg-[#173e31] text-white">
@@ -24,24 +27,26 @@ const Footer = () => {
                         </p>
                     </div>
                     <div className="flex items-center gap-4 rounded-2xl border border-white/15 bg-white/[0.06] p-4 sm:p-5">
-                        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#d2dfc5] text-[#31563c]">
-                            <Leaf className="size-5" aria-hidden="true" />
+                        <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#d2dfc5] text-[#244b31] shadow-sm">
+                            <Leaf className="size-5.5" aria-hidden="true" />
                         </span>
                         <div>
                             <p className="text-sm font-semibold text-white">Shop with intention</p>
                             <p className="mt-1 text-xs leading-5 text-white/60">Discover the collection, one good find at a time.</p>
                         </div>
-                        <Link href="/shop" aria-label="Explore the shop" className="ml-auto grid size-9 shrink-0 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20">
-                            <ArrowUpRight className="size-4" aria-hidden="true" />
+                        <Link href="/shop" aria-label="Explore the shop" className="ml-auto grid size-10 shrink-0 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20">
+                            <ArrowUpRight className="size-4.5" aria-hidden="true" />
                         </Link>
                     </div>
                 </div>
 
                 <div className="grid gap-9 sm:grid-cols-2 lg:grid-cols-[1.25fr_0.75fr_0.75fr_0.95fr] lg:gap-10">
                     <div className="max-w-sm">
-                        <Link href="/" className="inline-flex items-center gap-3" aria-label="Nivaroa home">
-                            <Image src={logo} alt="Nivaroa" width={48} height={48} className="size-12 object-contain" />
-                            <span className="text-lg font-semibold tracking-[0.16em]">NIVAROA</span>
+                        <Link href="/" className="group inline-flex items-center gap-3.5" aria-label="Nivaroa home">
+                            <div className="grid size-12 place-items-center rounded-2xl bg-white p-2 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.35)] ring-1 ring-white/30 transition-all duration-200 group-hover:scale-105 group-hover:bg-[#f6faf5]">
+                                <Image src={logo} alt="Nivaroa" width={40} height={40} className="size-8.5 object-contain" />
+                            </div>
+                            <span className="text-xl font-semibold tracking-[0.16em] text-white">NIVAROA</span>
                         </Link>
                         <p className="mt-4 text-sm leading-6 text-white/60">
                             A considered collection for the things you use, wear, and live with every day.
@@ -51,7 +56,7 @@ const Footer = () => {
                         </div>
                     </div>
 
-                    {footersection.map(({ heading, links }) => (
+                    {footerSections.map(({ heading, links }) => (
                         <nav key={heading} aria-label={`${heading} links`}>
                             <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#d5dfce]">{heading}</h3>
                             <ul className="mt-4 space-y-3">

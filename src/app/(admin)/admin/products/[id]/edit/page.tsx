@@ -1,11 +1,30 @@
 import Link from "next/link";
-import { ArrowLeft, PackagePlus } from "lucide-react";
+import { notFound } from "next/navigation";
+import { ArrowLeft, PackageCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductForm from "@/features/products/components/product-form";
+import { getProductById } from "@/features/products/data/products";
 import { getCategories } from "@/features/categories/data/categories";
 
-export default async function AddProductPage() {
-  const { categories } = await getCategories();
+type EditProductPageProps = {
+  params: Promise<{ id: string }>;
+};
+
+export default async function EditProductPage({ params }: EditProductPageProps) {
+  const { id } = await params;
+
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
+    notFound();
+  }
+
+  const [product, { categories }] = await Promise.all([
+    getProductById(id),
+    getCategories(),
+  ]);
+
+  if (!product) {
+    notFound();
+  }
 
   return (
     <main className="min-h-screen bg-[#f7f8f5] px-4 pb-12 pt-4 sm:px-7 lg:px-10">
@@ -21,18 +40,21 @@ export default async function AddProductPage() {
         <section className="overflow-hidden rounded-3xl border border-[#e8ebe5] bg-white shadow-[0_16px_50px_-35px_rgba(27,48,34,0.3)]">
           <div className="border-b border-[#edf0eb] bg-[#fbfcfa] px-5 py-6 sm:px-8">
             <span className="mb-4 grid size-11 place-items-center rounded-2xl bg-[#eaf2e8] text-[#4f7654]">
-              <PackagePlus className="size-5" aria-hidden="true" />
+              <PackageCheck className="size-5" aria-hidden="true" />
             </span>
+            <p className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-[#748779]">
+              Edit Product
+            </p>
             <h1 className="text-2xl font-semibold tracking-tight text-[#203329]">
-              Add New Product
+              {product.name}
             </h1>
             <p className="mt-1.5 text-sm leading-6 text-[#7d8980]">
-              Create a catalog product with image upload, pricing, and stock details.
+              Update product details, pricing, inventory quantity, or product photo.
             </p>
           </div>
 
           <div className="p-5 sm:p-8">
-            <ProductForm categories={categories} />
+            <ProductForm product={product} categories={categories} />
           </div>
         </section>
       </div>

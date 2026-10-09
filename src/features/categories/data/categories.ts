@@ -1,8 +1,47 @@
 import "server-only";
 
 import { cookies } from "next/headers";
+import { unstable_cache } from "next/cache";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/server";
 import type { CategoryRecord } from "../schemas/category.schema";
+
+function getPublicSupabaseClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const key =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  return createSupabaseClient(url, key);
+}
+
+/**
+ * Returns cached categories for public storefront navigation and layouts.
+ * Uses Next.js unstable_cache with tag 'categories' to prevent repeated API calls
+ * across page views, while automatically refreshing when categories change.
+ */
+export const getCachedCategories = unstable_cache(
+  async (): Promise<CategoryRecord[]> => {
+    try {
+      const supabase = getPublicSupabaseClient();
+      const { data, error } = await supabase
+        .from("categories")
+        .select("id, name, slug, parent_id, created_at, updated_at")
+        .order("name", { ascending: true });
+
+      if (error || !data) {
+        return [];
+      }
+      return data as CategoryRecord[];
+    } catch {
+      return [];
+    }
+  },
+  ["storefront-categories"],
+  {
+    tags: ["categories"],
+    revalidate: 3600,
+  }
+);
 
 export type CategoryTreeNode = CategoryRecord & {
   children: CategoryTreeNode[];
@@ -37,6 +76,30 @@ export async function getCategoryById(id: string): Promise<CategoryRecord | null
   if (error || !data) return null;
   return data as CategoryRecord;
 }
+
+export async function getCategoryBySlug(slug: string): Promise<CategoryRecord | null> {
+  const supabase = getPublicSupabaseClient();
+  const { data, error } = await supabase
+    .from("categories")
+    .select("id, name, slug, parent_id, created_at, updated_at")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return data as CategoryRecord;
+}
+
+export const getCachedCategoryBySlug = (slug: string) =>
+  unstable_cache(
+    async (): Promise<CategoryRecord | null> => {
+      return getCategoryBySlug(slug);
+    },
+    [`category-slug-${slug}`],
+    {
+      tags: ["categories", `category-slug-${slug}`],
+      revalidate: 3600,
+    }
+  )();
 
 export function buildCategoryTree(categories: CategoryRecord[]): CategoryTreeNode[] {
   const nodes = new Map<string, CategoryTreeNode>();

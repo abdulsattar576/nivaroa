@@ -8,8 +8,8 @@ import { ArrowLeft, LoaderCircle, PackagePlus, DollarSign, Layers } from "lucide
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import ImageConverterUpload from "./image-converter-upload";
-import { createProduct } from "../actions/products";
+import ProductImageUpload from "./product-image-upload";
+import { createProduct, updateProduct } from "../actions/products";
 import { ProductSchema, type ProductFormData, type ProductRecord } from "../schemas/product.schema";
 import type { CategoryRecord } from "@/features/categories/schemas/category.schema";
 
@@ -22,11 +22,12 @@ export default function ProductForm({ categories, product }: ProductFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [convertedImageFile, setConvertedImageFile] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<ProductFormData>({
     resolver: zodResolver(ProductSchema),
@@ -37,6 +38,7 @@ export default function ProductForm({ categories, product }: ProductFormProps) {
       quantity: product?.quantity ?? 0,
       product_description: product?.product_description ?? "",
       image_path: product?.image_path ?? "",
+      is_featured: product?.is_featured ?? false,
     },
   });
 
@@ -52,12 +54,15 @@ export default function ProductForm({ categories, product }: ProductFormProps) {
       formData.append("quantity", String(values.quantity));
       formData.append("product_description", values.product_description || "");
       formData.append("image_path", values.image_path || "");
+      formData.append("is_featured", String(Boolean(values.is_featured)));
 
-      if (convertedImageFile) {
-        formData.append("image_file", convertedImageFile);
+      if (imageFile) {
+        formData.append("image_file", imageFile);
       }
 
-      const result = await createProduct(formData);
+      const result = product?.id
+        ? await updateProduct(product.id, formData)
+        : await createProduct(formData);
 
       if (!result.success) {
         setServerError(result.message);
@@ -67,7 +72,9 @@ export default function ProductForm({ categories, product }: ProductFormProps) {
       router.push("/admin/product");
       router.refresh();
     } catch {
-      setServerError("Something went wrong while saving the product. Please try again.");
+      setServerError(
+        `Something went wrong while ${product ? "updating" : "saving"} the product. Please try again.`
+      );
     } finally {
       setIsSaving(false);
     }
@@ -190,11 +197,33 @@ export default function ProductForm({ categories, product }: ProductFormProps) {
             </p>
           )}
         </div>
+
+        {/* Featured Product Flag for Homepage Carousel */}
+        <div className="sm:col-span-2">
+          <label
+            htmlFor="product-featured"
+            className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#dce5de] bg-[#fbfcfb] p-4 transition hover:border-[#b8cdbd] hover:bg-[#f6f9f5]"
+          >
+            <input
+              id="product-featured"
+              type="checkbox"
+              {...register("is_featured")}
+              className="mt-0.5 size-4 rounded border-gray-300 text-[#174c3a] accent-[#174c3a] focus:ring-[#174c3a]"
+            />
+            <div className="text-sm">
+              <span className="font-medium text-[#22362b]">Featured product</span>
+              <p className="mt-0.5 text-xs text-[#718276]">
+                Feature this product on the home page carousel and curated collections.
+              </p>
+            </div>
+          </label>
+        </div>
       </div>
 
-      {/* Image Uploader & Built-In Format Converter */}
-      <ImageConverterUpload
-        onFileReady={(file) => setConvertedImageFile(file)}
+      {/* Direct Image Uploader */}
+      <ProductImageUpload
+        onImageSelected={(file) => setImageFile(file)}
+        onClearExistingImage={() => setValue("image_path", "")}
         defaultImageUrl={product?.image_path}
       />
 
@@ -224,7 +253,13 @@ export default function ProductForm({ categories, product }: ProductFormProps) {
           ) : (
             <PackagePlus aria-hidden="true" />
           )}
-          {isSaving ? "Saving product & uploading…" : "Save Product"}
+          {isSaving
+            ? product
+              ? "Updating product…"
+              : "Saving product…"
+            : product
+            ? "Update Product"
+            : "Save Product"}
         </Button>
       </div>
     </form>

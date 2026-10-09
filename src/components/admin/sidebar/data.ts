@@ -39,16 +39,7 @@ export const Nav_data: Sidebar_content_type[] = [
                 id: 2
 
             },
-            {
-                name:"Update Product",
-                href:"/admin/update-product",
-                id:3
-            },
-            {
-                name:"Delete Product",
-                href:"/admin/delete-product",
-                id:4
-            },
+             
             
         ]
     }

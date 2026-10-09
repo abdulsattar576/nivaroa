@@ -35,6 +35,8 @@ export const ProductSchema = z.object({
     .trim()
     .optional()
     .or(z.literal("")),
+
+  is_featured: z.boolean(),
 });
 
 export type ProductFormData = z.infer<typeof ProductSchema>;
@@ -47,6 +49,7 @@ export type ProductRecord = {
   image_path: string | null;
   product_description: string | null;
   quantity: number;
+  is_featured: boolean;
   created_at: string;
   updated_at: string;
   category?: {

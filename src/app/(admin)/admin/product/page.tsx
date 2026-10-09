@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Package, PackagePlus, Tag, AlertCircle } from "lucide-react";
+import { Package, PackagePlus, Tag, AlertCircle, Pencil, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DeleteProductButton from "@/features/products/components/delete-product-button";
 import { getProducts } from "@/features/products/data/products";
@@ -107,7 +107,14 @@ export default async function AdminProductsPage() {
                             )}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-semibold text-[#22352a]">{p.name}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold text-[#22352a]">{p.name}</p>
+                              {p.is_featured && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-amber-600/20">
+                                  <Sparkles className="size-2.5" /> Featured
+                                </span>
+                              )}
+                            </div>
                             {p.product_description && (
                               <p className="mt-0.5 line-clamp-1 text-xs text-[#828f85]">
                                 {p.product_description}
@@ -150,7 +157,17 @@ export default async function AdminProductsPage() {
 
                       {/* Actions */}
                       <td className="px-5 py-4 text-right">
-                        <DeleteProductButton id={p.id} name={p.name} />
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            render={<Link href={`/admin/products/${p.id}/edit`} />}
+                            className="h-8 gap-1.5 rounded-lg border-[#dbe4dc] px-2.5 text-xs text-[#2b4134] hover:bg-[#ebf2ea]"
+                          >
+                            <Pencil className="size-3.5" /> Edit
+                          </Button>
+                          <DeleteProductButton id={p.id} name={p.name} />
+                        </div>
                       </td>
                     </tr>
                   ))}

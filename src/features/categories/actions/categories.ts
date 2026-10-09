@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { createClient } from "@/utils/supabase/server";
 import { CategorySchema, slugify, type CategoryFormData } from "../schemas/category.schema";
 
@@ -71,7 +71,9 @@ export async function createCategory(input: CategoryFormData) {
 
   if (error) return { success: false as const, message: getMutationMessage(error.code) };
 
+  updateTag("categories");
   revalidatePath("/admin/categories");
+  revalidatePath("/", "layout");
   return { success: true as const, message: "Category created.", id: data.id };
 }
 
@@ -96,8 +98,10 @@ export async function updateCategory(id: string, input: CategoryFormData) {
   if (error) return { success: false as const, message: getMutationMessage(error.code) };
   if (!data) return { success: false as const, message: "This category no longer exists." };
 
+  updateTag("categories");
   revalidatePath("/admin/categories");
   revalidatePath(`/admin/categories/${id}/edit`);
+  revalidatePath("/", "layout");
   return { success: true as const, message: "Category updated." };
 }
 
@@ -119,6 +123,8 @@ export async function deleteCategory(id: string) {
   if (error) return { success: false as const, message: getMutationMessage(error.code, "delete") };
   if (!data) return { success: false as const, message: "This category no longer exists." };
 
+  updateTag("categories");
   revalidatePath("/admin/categories");
+  revalidatePath("/", "layout");
   return { success: true as const, message: "Category deleted." };
 }

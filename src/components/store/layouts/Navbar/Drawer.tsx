@@ -2,16 +2,25 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, Menu, Minus, Plus, Sparkles, X } from "lucide-react";
+import Image from "next/image";
+import { ChevronDown, Menu, Minus, Plus, X } from "lucide-react";
+import { Images } from "@/constant/Image";
 import { NavbarData } from "./navbar";
+import type { NavbarItem } from "./type";
 
-const Drawer = () => {
+type DrawerProps = {
+  items?: NavbarItem[];
+};
+
+const Drawer = ({ items }: DrawerProps) => {
   const [show, setShow] = useState(false);
   const [shopDrop, setShopDrop] = useState(false);
+  const { logo } = Images;
+  const navItems = items && items.length > 0 ? items : NavbarData;
 
   return (
     <>
-      <button type="button" aria-label={show ? "Close navigation menu" : "Open navigation menu"} aria-expanded={show} aria-controls="mobile-navigation" onClick={() => setShow((open) => !open)} className="relative z-60 grid size-10 place-items-center rounded-full text-[#304638] transition hover:bg-[#eff3ec]">
+      <button type="button" aria-label={show ? "Close navigation menu" : "Open navigation menu"} aria-expanded={show} aria-controls="mobile-navigation" onClick={() => setShow((open) => !open)} className="relative z-60 grid size-10 place-items-center rounded-xl text-[#304638] transition hover:bg-[#eff3ec]">
         {show ? <X className="size-5" aria-hidden="true" /> : <Menu className="size-5" aria-hidden="true" />}
       </button>
 
@@ -21,7 +30,9 @@ const Drawer = () => {
           <aside id="mobile-navigation" aria-label="Mobile navigation" className="fixed inset-y-0 left-0 z-50 flex w-[min(21rem,88vw)] flex-col bg-[#fbfcf8] shadow-[12px_0_48px_-20px_rgba(18,42,26,0.35)]">
             <div className="flex items-center justify-between border-b border-[#e8ece5] px-6 py-5">
               <Link href="/" onClick={() => setShow(false)} className="flex items-center gap-2.5 text-[#20382a]">
-                <span className="grid size-9 place-items-center rounded-xl bg-[#eaf1e7] text-[#3b6847]"><Sparkles className="size-4" aria-hidden="true" /></span>
+                <div className="grid size-9 place-items-center rounded-xl bg-[#edf3ea] p-1 ring-1 ring-[#d4e2d3]">
+                  <Image src={logo} alt="Nivaroa" width={28} height={28} className="size-7 object-contain" />
+                </div>
                 <span className="text-sm font-semibold tracking-[0.14em]">NIVAROA</span>
               </Link>
               <button type="button" aria-label="Close navigation menu" onClick={() => setShow(false)} className="grid size-9 place-items-center rounded-full text-[#657269] hover:bg-[#eff2ed]"><X className="size-5" aria-hidden="true" /></button>
@@ -30,7 +41,7 @@ const Drawer = () => {
             <nav className="flex-1 overflow-y-auto px-5 py-5" aria-label="Mobile main navigation">
               <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[0.17em] text-[#99a399]">Menu</p>
               <div className="space-y-1">
-                {NavbarData.map((item) => (
+                {navItems.map((item) => (
                   <div key={item.type === "link" ? item.link.id : item.id}>
                     {item.type === "link" ? (
                       <Link href={item.link.href} onClick={() => setShow(false)} className="flex items-center justify-between rounded-xl px-3 py-3 text-[15px] font-medium text-[#405146] transition hover:bg-[#eff3ec] hover:text-[#285b3d]">
