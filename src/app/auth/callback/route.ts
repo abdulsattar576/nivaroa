@@ -9,11 +9,19 @@ export async function GET(request: Request) {
   const errorParam = requestUrl.searchParams.get("error");
   const errorDescription = requestUrl.searchParams.get("error_description");
 
+  // Determine correct origin (handle Vercel / reverse proxy headers)
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
+  const isLocalEnv = process.env.NODE_ENV === "development";
+  const origin = !isLocalEnv && forwardedHost
+    ? `${forwardedProto}://${forwardedHost}`
+    : requestUrl.origin;
+
   if (errorParam || errorDescription) {
     const errorMsg = encodeURIComponent(
       errorDescription || errorParam || "Authentication with Google failed."
     );
-    return NextResponse.redirect(new URL(`/login?error=${errorMsg}`, requestUrl.origin));
+    return NextResponse.redirect(new URL(`/login?error=${errorMsg}`, origin));
   }
 
   if (code) {
@@ -46,11 +54,11 @@ export async function GET(request: Request) {
 
       // If user is admin and default redirect is root, route them to admin
       if (existingProfile?.role === "admin" && next === "/") {
-        return NextResponse.redirect(new URL("/admin", requestUrl.origin));
+        return NextResponse.redirect(new URL("/admin", origin));
       }
     }
   }
 
-  return NextResponse.redirect(new URL(next, requestUrl.origin));
+  return NextResponse.redirect(new URL(next, origin));
 }
 
