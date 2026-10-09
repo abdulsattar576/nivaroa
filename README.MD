@@ -23,6 +23,19 @@ A fast, elegant, and production-ready e-commerce platform built with **Next.js 1
   - Live database-cached categories.
   - Desktop dropdown navigation with hover debounce buffering.
   - Mobile slide-out drawer navigation.
+  - Reactive User Account badge & dropdown (`UserNav`) with instant sign-in / profile switch / sign-out.
+
+### 🔐 Authentication & Access Control
+- **Customer Registration (`/register`)**: Email and password registration with Zod validation, automated profile creation, and Google OAuth.
+- **User & Admin Login (`/login`, `/admin/login`)**: Role-aware login routing (customers redirected to storefront or previous destination, admins routed to `/admin`).
+- **Google OAuth ("Continue with Google")**: One-click Google sign-in using Supabase PKCE OAuth with server callback exchange (`/auth/callback`).
+- **Password Recovery**: Complete self-service forgot password (`/forgot-password`) and reset password (`/reset-password`) flow.
+- **Proxy Validation Engine (`src/lib/proxy.ts`)**:
+  - `AdminProxy`: Guards all administrative routes; verifies valid session and `profiles.role === 'admin'`.
+  - `UserProxy`: Protects customer accounts and authenticated checkouts.
+  - `GuestProxy`: Prevents authenticated users from accessing login/registration pages.
+  - `getCurrentUser`: Safe non-redirecting session inspector for server components and layouts.
+- **Automated Profile Provisioning**: PostgreSQL `handle_new_user()` trigger on `auth.users` automatically synchronizes customer profile records upon sign-up or OAuth login.
 
 ### 🛡️ Admin Portal (`/admin`)
 - **Inventory & Product Management (`/admin/product`)**:
@@ -34,7 +47,7 @@ A fast, elegant, and production-ready e-commerce platform built with **Next.js 1
 - **Hierarchical Category Management (`/admin/categories`)**:
   - Multi-level parent-child category tree with automatic slug generation.
 - **Role-Based Access Control (RBAC)**:
-  - Secured with Supabase Auth and PostgreSQL Row Level Security (RLS) policies (`profiles.role = 'admin'`).
+  - Secured with Supabase Auth, `AdminProxy`, and PostgreSQL Row Level Security (RLS) policies (`profiles.role = 'admin'`).
 
 ### ⚡ Performance & Caching
 - **Zero Redundant API Calls**: Powered by Next.js `unstable_cache` with granular revalidation tags (`categories`, `products`, `featured-products`).
@@ -113,6 +126,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 Execute the migration scripts located in `supabase/migrations/`:
 - `20261007230104_create_product.sql`: Creates `categories`, `products`, `profiles` tables, and RLS policies.
 - `20261009060700_add_is_featured_to_products.sql`: Adds the `is_featured` column and performance index for carousel highlights.
+- `20261010023000_create_profile_trigger_and_policies.sql`: Adds the `handle_new_user()` trigger for automated user profile creation and customer RLS policies.
 
 In your Supabase Storage dashboard, create a public bucket named:
 - **`products`** (Public access enabled for `/catalog/*` images)

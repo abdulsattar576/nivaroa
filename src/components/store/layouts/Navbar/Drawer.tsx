@@ -8,11 +8,16 @@ import { Images } from "@/constant/Image";
 import { NavbarData } from "./navbar";
 import type { NavbarItem } from "./type";
 
+import { signOutUser } from "@/features/auth/actions/auth";
+import type { AuthenticatedSession } from "@/lib/proxy";
+import { LayoutDashboard, LogOut, User } from "lucide-react";
+
 type DrawerProps = {
   items?: NavbarItem[];
+  session?: AuthenticatedSession | null;
 };
 
-const Drawer = ({ items }: DrawerProps) => {
+const Drawer = ({ items, session }: DrawerProps) => {
   const [show, setShow] = useState(false);
   const [shopDrop, setShopDrop] = useState(false);
   const { logo } = Images;
@@ -67,12 +72,60 @@ const Drawer = ({ items }: DrawerProps) => {
               </div>
             </nav>
 
+            {/* Mobile Account Section */}
             <div className="border-t border-[#e8ece5] p-5">
-              <div className="rounded-2xl bg-[#edf3e9] p-4">
-                <p className="text-sm font-semibold text-[#345640]">A little more Nivaroa</p>
-                <p className="mt-1 text-xs leading-5 text-[#748576]">Thoughtfully selected pieces for everyday living.</p>
-                <Link href="/shop" onClick={() => setShow(false)} className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-[#376b47]">Discover the collection <ChevronDown className="size-3 -rotate-90" aria-hidden="true" /></Link>
-              </div>
+              {session ? (
+                <div className="space-y-3 rounded-2xl bg-[#edf3e9] p-4">
+                  <div className="flex items-center gap-3">
+                    <span className="grid size-9 place-items-center rounded-xl bg-[#174c3a] text-xs font-bold text-white shadow-xs">
+                      {(session.profile.full_name || session.user.email || "U")
+                        .slice(0, 2)
+                        .toUpperCase()}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs font-bold text-[#1b3425]">
+                        {session.profile.full_name || "Member"}
+                      </p>
+                      <p className="truncate text-[11px] text-[#697d6d]">{session.user.email}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5 pt-1 text-xs font-semibold">
+                    {session.profile.role === "admin" && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setShow(false)}
+                        className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-[#1c4d37] shadow-2xs hover:bg-[#e4ede0]"
+                      >
+                        <LayoutDashboard className="size-4" /> Admin Dashboard
+                      </Link>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setShow(false);
+                        await signOutUser();
+                      }}
+                      className="flex items-center gap-2 rounded-xl px-3 py-2 text-rose-600 hover:bg-rose-50"
+                    >
+                      <LogOut className="size-4" /> Sign out
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-2xl bg-[#edf3e9] p-4">
+                  <p className="text-sm font-semibold text-[#345640]">Welcome to Nivaroa</p>
+                  <p className="mt-1 text-xs leading-5 text-[#748576]">Sign in to track orders and save your favorite pieces.</p>
+                  <Link
+                    href="/login"
+                    onClick={() => setShow(false)}
+                    className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-[#174c3a] px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#103d31]"
+                  >
+                    <User className="size-3.5" /> Sign in
+                  </Link>
+                </div>
+              )}
             </div>
           </aside>
         </>

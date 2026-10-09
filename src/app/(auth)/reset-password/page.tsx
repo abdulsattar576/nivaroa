@@ -1,13 +1,18 @@
-import AdminLoginForm from '@/features/auth/components/admin.login.form'
-import { ArrowDownRight, Check, LockKeyhole, Sparkles } from 'lucide-react'
-import Link from 'next/link'
-import { GuestProxy } from '@/lib/proxy'
+import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowDownRight, KeyRound, ShieldCheck, Sparkles } from "lucide-react";
+import ResetPasswordForm from "@/features/auth/components/reset-password-form";
 
-const AdminLoginPage = async () => {
-  await GuestProxy('/admin')
+export const metadata: Metadata = {
+  title: "Set New Password | Nivaroa",
+  description: "Create a new password for your Nivaroa account.",
+};
+
+export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen bg-[#f5f7f3] p-3 sm:p-6 lg:p-8">
-      <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-6xl overflow-hidden rounded-4xl bg-white shadow-[0_24px_90px_-36px_rgba(15,52,39,0.28)] lg:grid-cols-[1.03fr_0.97fr]">
+      <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-6xl overflow-hidden rounded-4xl bg-white shadow-[0_24px_90px_-36px_rgba(15,52,39,0.25)] lg:grid-cols-[1.05fr_0.95fr]">
+        {/* Left: Brand Presentation Banner */}
         <section className="relative isolate flex min-h-80 flex-col justify-between overflow-hidden bg-[#103d31] p-7 text-white sm:p-10 lg:min-h-170 lg:p-14">
           <div aria-hidden="true" className="absolute inset-0 -z-10 overflow-hidden">
             <div className="absolute -right-24 -top-28 size-96 rounded-full border border-white/10" />
@@ -26,48 +31,45 @@ const AdminLoginPage = async () => {
           <div className="max-w-lg py-12 lg:py-0">
             <p className="mb-5 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#c5df9b]">
               <span className="size-1.5 rounded-full bg-[#c5df9b]" />
-              The Nivaroa workspace
+              Account Security
             </p>
             <h1 className="max-w-md text-4xl font-medium leading-[1.12] tracking-tight sm:text-5xl">
-              A calmer way to manage your store.
+              Create a fresh password.
             </h1>
             <p className="mt-5 max-w-md text-sm leading-7 text-white/70 sm:text-base">
-              Sign in to your admin workspace to keep products, orders, and the details that make Nivaroa yours in sync.
+              Choose a secure password with at least 6 characters to restore access to your account.
             </p>
           </div>
 
           <div className="flex items-center justify-between border-t border-white/15 pt-5 text-xs text-white/60">
-            <span>Thoughtfully made for your team</span>
+            <span className="flex items-center gap-2">
+              <ShieldCheck className="size-4 text-[#c5df9b]" />
+              Encrypted password update
+            </span>
             <ArrowDownRight className="size-4" aria-hidden="true" />
           </div>
         </section>
 
+        {/* Right: Reset Password Form */}
         <section className="flex items-center justify-center px-6 py-12 sm:px-12 lg:px-14">
           <div className="w-full max-w-md">
-            <div className="mb-9 inline-flex items-center gap-2 rounded-full bg-[#f0f6ed] px-3.5 py-2 text-xs font-medium text-[#315d45]">
-              <LockKeyhole className="size-3.5" aria-hidden="true" />
-              Secure administrator access
-            </div>
-            <div className="mb-8">
-              <h2 className="text-3xl font-semibold tracking-tight text-[#172a22] sm:text-[2.1rem]">
-                Welcome back
+            <div className="mb-7">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#edf4ec] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#1e4d37]">
+                <KeyRound className="size-3 text-[#1e4d37]" /> Set new credentials
+              </span>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#172a22]">
+                New password
               </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-500">
-                Enter your administrator credentials to continue.
+              <p className="mt-1.5 text-xs text-slate-500 sm:text-sm">
+                Enter and confirm your new password below.
               </p>
             </div>
 
-            <AdminLoginForm />
-
-            <p className="mt-8 flex items-center justify-center gap-2 text-center text-xs text-slate-400">
-              <Check className="size-3.5 text-[#3b7656]" aria-hidden="true" />
-              Your sign-in is encrypted and protected.
-            </p>
+            <ResetPasswordForm />
           </div>
         </section>
       </div>
     </div>
-  )
+  );
 }
 
-export default AdminLoginPage

@@ -6,10 +6,15 @@ import Drawer from "./Drawer";
 import { buildNavbarData } from "./navbar";
 import Dropdown from "./Dropdown";
 import { getCachedCategories } from "@/features/categories/data/categories";
+import { getCurrentUser } from "@/lib/proxy";
+import UserNav from "./user-nav";
 
 const Navbar = async () => {
   const { logo } = Images;
-  const categories = await getCachedCategories();
+  const [categories, userSession] = await Promise.all([
+    getCachedCategories(),
+    getCurrentUser(),
+  ]);
   const navbarItems = buildNavbarData(categories);
 
   return (
@@ -32,7 +37,7 @@ const Navbar = async () => {
             ))}
           </nav>
 
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2.5">
             <button
               type="button"
               aria-label="Search"
@@ -50,35 +55,41 @@ const Navbar = async () => {
                 0
               </span>
             </Link>
+
+            {/* Desktop User Account Nav */}
+            <UserNav session={userSession} />
           </div>
         </div>
 
         <div className="relative mx-auto flex h-[4.25rem] max-w-[1440px] items-center justify-between px-4 sm:px-6 lg:hidden">
-          <Drawer items={navbarItems} />
+          <Drawer items={navbarItems} session={userSession} />
           <Link href="/" className="absolute left-1/2 flex -translate-x-1/2 items-center gap-2.5" aria-label="Nivaroa home">
             <div className="grid size-9 place-items-center rounded-xl bg-[#edf3ea] p-1 shadow-sm ring-1 ring-[#d4e2d3]">
               <Image src={logo} alt="Nivaroa" width={28} height={28} className="size-7 object-contain" priority />
             </div>
             <span className="text-[1.15rem] font-semibold tracking-[0.15em] text-[#193225]">NIVAROA</span>
           </Link>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <button
               type="button"
               aria-label="Search"
-              className="grid size-10 place-items-center rounded-xl text-[#35493b] transition hover:bg-[#ebf2e8]"
+              className="grid size-9 place-items-center rounded-xl text-[#35493b] transition hover:bg-[#ebf2e8]"
             >
-              <Search className="size-5" aria-hidden="true" />
+              <Search className="size-4.5" aria-hidden="true" />
             </button>
             <Link
               href="/cart"
               aria-label="Shopping bag"
-              className="relative grid size-10 place-items-center rounded-xl text-[#35493b] transition hover:bg-[#ebf2e8]"
+              className="relative grid size-9 place-items-center rounded-xl text-[#35493b] transition hover:bg-[#ebf2e8]"
             >
-              <ShoppingBag className="size-5" aria-hidden="true" />
-              <span className="absolute -right-0.5 -top-0.5 grid size-4.5 min-w-[18px] place-items-center rounded-full bg-[#1b4e3a] px-1 text-[10px] font-semibold text-white shadow-sm ring-2 ring-white">
+              <ShoppingBag className="size-4.5" aria-hidden="true" />
+              <span className="absolute -right-0.5 -top-0.5 grid size-4 min-w-[16px] place-items-center rounded-full bg-[#1b4e3a] px-1 text-[9px] font-semibold text-white shadow-sm ring-2 ring-white">
                 0
               </span>
             </Link>
+
+            {/* Mobile User Account Nav */}
+            <UserNav session={userSession} />
           </div>
         </div>
       </header>
