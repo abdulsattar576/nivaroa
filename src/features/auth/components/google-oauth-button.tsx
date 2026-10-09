@@ -38,7 +38,17 @@ export default function GoogleOAuthButton({
       });
 
       if (signInError) {
-        setError(signInError.message);
+        const msg = signInError.message || "";
+        if (
+          msg.toLowerCase().includes("provider is not enabled") ||
+          msg.toLowerCase().includes("unsupported provider")
+        ) {
+          setError(
+            "Google sign-in is not enabled in your Supabase project yet. Please enable the Google provider in your Supabase Dashboard (Authentication > Providers > Google)."
+          );
+        } else {
+          setError(msg);
+        }
         setLoading(false);
       }
     } catch {

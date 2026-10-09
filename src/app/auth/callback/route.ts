@@ -6,6 +6,15 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
   const next = requestUrl.searchParams.get("next") || "/";
+  const errorParam = requestUrl.searchParams.get("error");
+  const errorDescription = requestUrl.searchParams.get("error_description");
+
+  if (errorParam || errorDescription) {
+    const errorMsg = encodeURIComponent(
+      errorDescription || errorParam || "Authentication with Google failed."
+    );
+    return NextResponse.redirect(new URL(`/login?error=${errorMsg}`, requestUrl.origin));
+  }
 
   if (code) {
     const cookieStore = await cookies();

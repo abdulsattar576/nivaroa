@@ -16,7 +16,7 @@ export default function UserLoginForm() {
   const returnTo = searchParams.get("returnTo") || "/";
 
   const [showPassword, setShowPassword] = useState(false);
-  const [serverError, setServerError] = useState("");
+  const [serverError, setServerError] = useState(searchParams.get("error") || "");
 
   const {
     register,
