@@ -17,13 +17,33 @@ A fast, elegant, and production-ready e-commerce platform built with **Next.js 1
   - Live sorting (*Featured First*, *Newest*, *Price: Low to High*, *Price: High to Low*).
   - Breadcrumb navigation and item counters.
 - **Categories Directory (`/categories`)**: Visual department directory displaying item counts and direct collection links.
-- **Complete Shop Catalog (`/shop`)**: Browse the entire catalog with automatic query redirection (`/shop?category=[slug]` → `/categories/[slug]`).
-- **Resilient Image Presentation**: Zero broken image states with `<ProductCardImage>`, loading skeletons, unclipped `object-contain` scaling, and graceful `<Package />` fallbacks.
+- **Rich Product Detail Pages (`/product/[slug]` & `/products/[slug]`)**:
+  - Interactive multi-image gallery with zoom preview and thumbnail navigation.
+  - Formatted discount calculations (`% OFF` and savings tag from `compare_at_price`).
+  - Real-time stock status indicators (*In Stock*, *Low Stock Alert*, *Out of Stock*).
+  - Key bullet highlights, technical specifications table, SKU codes, and verified reviews summary.
+  - Interactive quantity selector with "Add to Cart" and instant "Buy Now" triggers.
+  - "You May Also Like" related product recommendations from the same department.
+- **Interactive Shopping Cart (`/cart`)**:
+  - Persistent client-side cart (`CartProvider`) stored in `localStorage`.
+  - Dynamic `CartBadge` in desktop navbar and mobile drawer with real-time item count.
+  - Line-item quantity editing, removal, subtotal calculation, and Free Shipping threshold indicator ($100+).
+- **Cash on Delivery (COD) Checkout (`/checkout`)**:
+  - Validated shipping address and contact collection with Zod and React Hook Form.
+  - Pre-filled customer profile details for logged-in users.
+  - **Cash on Delivery (COD)** payment selection with Easypaisa merchant verification notice.
+  - Automated stock inventory decrementing upon successful order placement.
+- **Order Confirmation & Tracking (`/orders/[orderNumber]/success`)**:
+  - Branded order receipt with unique reference code (`NVR-XXXXXX`), breakdown, and delivery timeframe.
+- **Customer Account Dashboard (`/account` & `/account/orders`)**:
+  - Guarded by `UserProxy` authentication.
+  - Customer overview with lifetime spending, total purchases, and active in-transit counters.
+  - Order history with live visual lifecycle status badges (*Pending*, *Confirmed*, *Processing*, *Shipped*, *Delivered*, *Cancelled*).
 - **Dynamic Navbar & Footer**:
   - Live database-cached categories.
   - Desktop dropdown navigation with hover debounce buffering.
-  - Mobile slide-out drawer navigation.
-  - Reactive User Account badge & dropdown (`UserNav`) with instant sign-in / profile switch / sign-out.
+  - Mobile slide-out drawer navigation with user account shortcuts.
+  - Reactive User Account badge & dropdown (`UserNav`) with links to My Account, My Orders, and Sign Out.
 
 ### 🔐 Authentication & Access Control
 - **Customer Registration (`/register`)**: Email and password registration with Zod validation, automated profile creation, and Google OAuth.
@@ -127,6 +147,8 @@ Execute the migration scripts located in `supabase/migrations/`:
 - `20261007230104_create_product.sql`: Creates `categories`, `products`, `profiles` tables, and RLS policies.
 - `20261009060700_add_is_featured_to_products.sql`: Adds the `is_featured` column and performance index for carousel highlights.
 - `20261010023000_create_profile_trigger_and_policies.sql`: Adds the `handle_new_user()` trigger for automated user profile creation and customer RLS policies.
+- `20261011223000_extend_product_schema_for_details.sql`: Adds `slug`, `images[]`, `compare_at_price`, `sku`, `highlights`, `specifications`, and `rating` to products table.
+- `20261012010000_create_orders_and_order_items.sql`: Creates `orders` and `order_items` tables with RLS policies and indexes for Cash on Delivery and checkout.
 
 In your Supabase Storage dashboard, create a public bucket named:
 - **`products`** (Public access enabled for `/catalog/*` images)

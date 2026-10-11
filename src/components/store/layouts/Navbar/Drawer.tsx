@@ -10,7 +10,7 @@ import type { NavbarItem } from "./type";
 
 import { signOutUser } from "@/features/auth/actions/auth";
 import type { AuthenticatedSession } from "@/lib/proxy";
-import { LayoutDashboard, LogOut, User } from "lucide-react";
+import { LayoutDashboard, LogOut, Package, User } from "lucide-react";
 
 type DrawerProps = {
   items?: NavbarItem[];
@@ -91,6 +91,22 @@ const Drawer = ({ items, session }: DrawerProps) => {
                   </div>
 
                   <div className="flex flex-col gap-1.5 pt-1 text-xs font-semibold">
+                    <Link
+                      href="/account"
+                      onClick={() => setShow(false)}
+                      className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-[#244030] shadow-2xs hover:bg-[#e4ede0]"
+                    >
+                      <User className="size-4 text-[#174c3a]" /> My Account
+                    </Link>
+
+                    <Link
+                      href="/account/orders"
+                      onClick={() => setShow(false)}
+                      className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-[#244030] shadow-2xs hover:bg-[#e4ede0]"
+                    >
+                      <Package className="size-4 text-[#174c3a]" /> My Orders
+                    </Link>
+
                     {session.profile.role === "admin" && (
                       <Link
                         href="/admin"

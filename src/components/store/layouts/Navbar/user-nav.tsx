@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { LayoutDashboard, LogOut, Shield, User } from "lucide-react";
+import { LayoutDashboard, LogOut, Package, Shield, User } from "lucide-react";
 import type { AuthenticatedSession } from "@/lib/proxy";
 import { signOutUser } from "@/features/auth/actions/auth";
 
@@ -79,6 +79,24 @@ export default function UserNav({ session }: UserNavProps) {
 
           {/* Menu links */}
           <div className="space-y-1 py-1.5 text-xs">
+            <Link
+              href="/account"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-2 rounded-xl px-3 py-2 font-medium text-[#263e2f] hover:bg-[#edf4ec]"
+            >
+              <User className="size-4 text-[#174c3a]" />
+              <span>My Account</span>
+            </Link>
+
+            <Link
+              href="/account/orders"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-2 rounded-xl px-3 py-2 font-medium text-[#263e2f] hover:bg-[#edf4ec]"
+            >
+              <Package className="size-4 text-[#174c3a]" />
+              <span>My Orders</span>
+            </Link>
+
             {isAdmin && (
               <Link
                 href="/admin"

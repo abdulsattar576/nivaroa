@@ -12,6 +12,7 @@ import {
   Truck,
   Zap,
 } from "lucide-react";
+import { useCart } from "@/features/cart/context/cart-context";
 import type { ProductRecord } from "@/features/products/schemas/product.schema";
 
 type ProductActionsProps = {
@@ -20,6 +21,7 @@ type ProductActionsProps = {
 
 export default function ProductActions({ product }: ProductActionsProps) {
   const router = useRouter();
+  const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
   const [isBuying, setIsBuying] = useState(false);
@@ -39,26 +41,16 @@ export default function ProductActions({ product }: ProductActionsProps) {
   const handleAddToCart = () => {
     if (isOutOfStock) return;
 
-    // Simple temporary notification / local event (ready for global cart integration)
+    addItem(product, quantity);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2200);
-
-    // Dispatch a custom event so other components (e.g., cart badge) can listen if needed
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent("cart:add", {
-          detail: { product, quantity },
-        })
-      );
-    }
   };
 
   const handleBuyNow = () => {
     if (isOutOfStock) return;
     setIsBuying(true);
-    handleAddToCart();
-    // Navigate to checkout or cart
-    router.push("/cart");
+    addItem(product, quantity);
+    router.push("/checkout");
   };
 
   return (

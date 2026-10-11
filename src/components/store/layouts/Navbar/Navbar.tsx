@@ -8,6 +8,7 @@ import Dropdown from "./Dropdown";
 import { getCachedCategories } from "@/features/categories/data/categories";
 import { getCurrentUser } from "@/lib/proxy";
 import UserNav from "./user-nav";
+import CartBadge from "./cart-badge";
 
 const Navbar = async () => {
   const { logo } = Images;
@@ -45,16 +46,7 @@ const Navbar = async () => {
             >
               <Search className="size-5" aria-hidden="true" />
             </button>
-            <Link
-              href="/cart"
-              aria-label="Shopping bag"
-              className="relative grid size-10 place-items-center rounded-xl text-[#35493b] transition-all duration-200 hover:bg-[#ebf2e8] hover:text-[#174c3a]"
-            >
-              <ShoppingBag className="size-5" aria-hidden="true" />
-              <span className="absolute -right-0.5 -top-0.5 grid size-4.5 min-w-[18px] place-items-center rounded-full bg-[#1b4e3a] px-1 text-[10px] font-semibold text-white shadow-sm ring-2 ring-white">
-                0
-              </span>
-            </Link>
+            <CartBadge />
 
             {/* Desktop User Account Nav */}
             <UserNav session={userSession} />
@@ -77,16 +69,7 @@ const Navbar = async () => {
             >
               <Search className="size-4.5" aria-hidden="true" />
             </button>
-            <Link
-              href="/cart"
-              aria-label="Shopping bag"
-              className="relative grid size-9 place-items-center rounded-xl text-[#35493b] transition hover:bg-[#ebf2e8]"
-            >
-              <ShoppingBag className="size-4.5" aria-hidden="true" />
-              <span className="absolute -right-0.5 -top-0.5 grid size-4 min-w-[16px] place-items-center rounded-full bg-[#1b4e3a] px-1 text-[9px] font-semibold text-white shadow-sm ring-2 ring-white">
-                0
-              </span>
-            </Link>
+            <CartBadge isMobile />
 
             {/* Mobile User Account Nav */}
             <UserNav session={userSession} />
