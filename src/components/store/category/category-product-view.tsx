@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -19,6 +19,7 @@ import {
 import type { CategoryRecord } from "@/features/categories/schemas/category.schema";
 import type { ProductRecord } from "@/features/products/schemas/product.schema";
 import { Button } from "@/components/ui/button";
+import { StoreProductCard } from "../product/store-product-card";
 
 type CategoryProductViewProps = {
   category: CategoryRecord;
@@ -78,8 +79,15 @@ export default function CategoryProductView({
   const [inStockOnly, setInStockOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const [items, setItems] = useState<ProductRecord[]>(products);
+
+  // Keep state updated whenever server component pushes new products (e.g. via realtime router.refresh())
+  useEffect(() => {
+    setItems(products);
+  }, [products]);
+
   const filteredAndSortedProducts = useMemo(() => {
-    let result = [...products];
+    let result = [...items];
 
     // Filter by search query
     if (searchQuery.trim()) {
@@ -238,88 +246,7 @@ export default function CategoryProductView({
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
           {filteredAndSortedProducts.map((product) => (
-            <div
-              key={product.id}
-              className="group relative flex flex-col overflow-hidden rounded-2xl border border-[#e2eae0] bg-white transition-all duration-300 hover:border-[#b4cbb7] hover:shadow-[0_12px_36px_-12px_rgba(20,60,40,0.18)]"
-            >
-              {/* Product Image Frame */}
-              <Link
-                href={`/product/${product.slug || product.id}`}
-                className="relative aspect-square sm:aspect-[4/5] w-full overflow-hidden bg-[#f6f9f5] block"
-              >
-                <ProductCardImage
-                  src={product.image_path}
-                  alt={product.name}
-                />
-
-                {/* Top Badges */}
-                <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5">
-                  {product.is_featured && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-[#1d4d38] shadow-sm backdrop-blur-sm sm:text-[10px]">
-                      <Sparkles className="size-2.5 text-amber-500" /> Featured
-                    </span>
-                  )}
-                  {product.badge && (
-                    <span className="inline-flex items-center rounded-full bg-[#174c3a] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-white shadow-sm sm:text-[10px]">
-                      {product.badge}
-                    </span>
-                  )}
-                </div>
-
-                {/* Out of stock overlay */}
-                {product.quantity <= 0 && (
-                  <div className="absolute inset-0 grid place-items-center bg-[#14231b]/40 backdrop-blur-[2px]">
-                    <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#8b2626]">
-                      Out of stock
-                    </span>
-                  </div>
-                )}
-              </Link>
-
-              {/* Product Details Block */}
-              <div className="flex flex-1 flex-col justify-between p-3.5 sm:p-4">
-                <div>
-                  <div className="flex items-center gap-1 text-[11px] text-[#788b7d]">
-                    <Tag className="size-2.5" /> {category.name}
-                  </div>
-                  <Link href={`/product/${product.slug || product.id}`}>
-                    <h4 className="mt-1 line-clamp-1 text-sm font-semibold text-[#1c3325] transition-colors group-hover:text-[#174c3a] sm:text-base">
-                      {product.name}
-                    </h4>
-                  </Link>
-                  {product.product_description && (
-                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[#738779]">
-                      {product.product_description}
-                    </p>
-                  )}
-                </div>
-
-                <div className="mt-4 flex items-center justify-between border-t border-[#edf2ea] pt-3">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider text-[#8c9c8f]">
-                      Price
-                    </p>
-                    <div className="flex items-baseline gap-1.5">
-                      <p className="text-sm font-bold text-[#173e2e] sm:text-base">
-                        ${Number(product.price).toFixed(2)}
-                      </p>
-                      {product.compare_at_price && product.compare_at_price > product.price && (
-                        <p className="text-[11px] text-slate-400 line-through">
-                          ${Number(product.compare_at_price).toFixed(2)}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <Link
-                    href={`/product/${product.slug || product.id}`}
-                    className="inline-flex items-center gap-1 rounded-xl border border-[#d6e3d4] bg-[#f8faf7] px-3 py-1.5 text-xs font-semibold text-[#1c4d37] transition-all hover:border-[#174c3a] hover:bg-[#174c3a] hover:text-white"
-                  >
-                    <Eye className="size-3" /> View
-                  </Link>
-                </div>
-              </div>
-            </div>
+            <StoreProductCard key={product.id} product={product} showCategoryBadge={category.id === "all"} />
           ))}
         </div>
       )}

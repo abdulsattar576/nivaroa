@@ -1,2 +1,2 @@
-export { default, generateMetadata, generateStaticParams } from "../../categories/[slug]/page";
+export { default, generateMetadata, generateStaticParams, revalidate, dynamicParams } from "../../categories/[slug]/page";
 

@@ -56,7 +56,8 @@ export async function createOrder(
   const shippingFee = subtotal >= 100 ? 0 : 10;
   const total = subtotal + shippingFee;
 
-  // Generate unique order reference (e.g. NVR-849201)
+  // Generate unique order reference and ID
+  const orderId = crypto.randomUUID();
   const timestamp = Date.now().toString().slice(-6);
   const randomSuffix = Math.floor(10 + Math.random() * 90);
   const orderNumber = `NVR-${timestamp}${randomSuffix}`;
@@ -65,6 +66,7 @@ export async function createOrder(
   const { data: order, error: orderError } = await supabase
     .from("orders")
     .insert({
+      id: orderId,
       order_number: orderNumber,
       user_id: user?.id || null,
       status: "pending",
@@ -82,18 +84,22 @@ export async function createOrder(
       total,
     })
     .select("id, order_number")
-    .single();
+    .maybeSingle();
 
-  if (orderError || !order) {
+  if (orderError) {
+    console.error("Order insert error:", orderError);
     return {
       success: false as const,
-      message: orderError?.message || "Could not place order. Please try again.",
+      message: orderError.message || "Could not place order. Please try again.",
     };
   }
 
+  const finalOrderId = order?.id || orderId;
+  const finalOrderNumber = order?.order_number || orderNumber;
+
   // 2. Insert Order Items
   const orderItemsData = items.map((item) => ({
-    order_id: order.id,
+    order_id: finalOrderId,
     product_id: item.id,
     product_name: item.name,
     product_image: item.image,
@@ -132,14 +138,17 @@ export async function createOrder(
     }
   }
 
+  revalidatePath("/admin");
   revalidatePath("/admin/orders");
+  revalidatePath("/admin/sales");
+  revalidatePath("/admin/users");
   revalidatePath("/admin/product");
   revalidatePath("/account/orders");
 
   return {
     success: true as const,
-    orderId: order.id,
-    orderNumber: order.order_number,
+    orderId: finalOrderId,
+    orderNumber: finalOrderNumber,
     message: "Your order has been placed successfully!",
   };
 }

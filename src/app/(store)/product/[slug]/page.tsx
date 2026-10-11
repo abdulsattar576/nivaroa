@@ -11,6 +11,10 @@ type ProductPageProps = {
   params: Promise<{ slug: string }>;
 };
 
+// Enable Incremental Static Regeneration (ISR)
+export const revalidate = 60; // Cache for 60s, then revalidate in background on incoming requests
+export const dynamicParams = true; // Statically pre-render known slugs, lazily ISR generate unknown ones
+
 export async function generateStaticParams() {
   const slugs = await getAllProductSlugs();
   return slugs.map((slug) => ({ slug }));

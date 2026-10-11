@@ -33,6 +33,10 @@ export async function generateMetadata({
   };
 }
 
+// Enable Incremental Static Regeneration (ISR)
+export const revalidate = 60; // Revalidate category pages every 60s
+export const dynamicParams = true;
+
 export async function generateStaticParams() {
   const categories = await getCachedCategories();
   return categories.map((cat) => ({

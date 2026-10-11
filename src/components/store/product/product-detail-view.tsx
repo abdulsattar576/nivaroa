@@ -4,6 +4,7 @@ import ProductGallery from "./product-gallery";
 import ProductActions from "./product-actions";
 import ProductSpecsTabs from "./product-specs-tabs";
 import ProductCardImage from "./product-card-image";
+import { StoreProductCard } from "./store-product-card";
 import type { ProductRecord } from "@/features/products/schemas/product.schema";
 
 type ProductDetailViewProps = {
@@ -124,23 +125,38 @@ export default function ProductDetailView({
                 {product.name}
               </h1>
 
-              {/* Social Proof (Stars & Rating) */}
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1 text-amber-500">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className="size-4 fill-current text-amber-500"
-                    />
-                  ))}
+              {/* Social Proof (Stars & Rating based strictly on real reviews) */}
+              {product.reviews_count && product.reviews_count > 0 && product.rating ? (
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1 text-amber-500">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`size-4 ${
+                          star <= Math.round(product.rating || 0)
+                            ? "fill-current text-amber-500"
+                            : "text-slate-200"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-xs font-semibold text-[#1f3729]">
+                    {product.rating.toFixed(1)}
+                  </span>
+                  <span className="text-xs text-[#738578]">
+                    • {product.reviews_count} Verified Customer {product.reviews_count === 1 ? "Review" : "Reviews"}
+                  </span>
                 </div>
-                <span className="text-xs font-semibold text-[#1f3729]">
-                  {(product.rating || 5.0).toFixed(1)}
-                </span>
-                <span className="text-xs text-[#738578]">
-                  • {product.reviews_count || 1} Customer Reviews
-                </span>
-              </div>
+              ) : (
+                <div className="flex items-center gap-2 text-xs text-[#63776a]">
+                  <div className="flex items-center gap-0.5 text-slate-200">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star key={star} className="size-3.5 fill-current" />
+                    ))}
+                  </div>
+                  <span>No customer ratings yet • Be the first to leave a review!</span>
+                </div>
+              )}
 
               {/* Price Block */}
               <div className="rounded-2xl border border-[#e4ebe4] bg-white p-5 shadow-xs">
@@ -222,71 +238,9 @@ export default function ProductDetailView({
             </div>
 
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 sm:gap-6">
-              {relatedProducts.map((rel) => {
-                const relDiscount =
-                  rel.compare_at_price != null &&
-                  rel.compare_at_price > rel.price
-                    ? Math.round(
-                        ((rel.compare_at_price - rel.price) /
-                          rel.compare_at_price) *
-                          100
-                      )
-                    : null;
-
-                return (
-                  <Link
-                    key={rel.id}
-                    href={`/product/${rel.slug || rel.id}`}
-                    className="group flex flex-col overflow-hidden rounded-2xl border border-[#e1eae1] bg-white transition hover:-translate-y-1 hover:border-[#b8cdbd] hover:shadow-lg"
-                  >
-                    <div className="relative aspect-4/5 w-full overflow-hidden bg-[#f7f9f6]">
-                      {rel.badge && (
-                        <span className="absolute left-2.5 top-2.5 z-10 rounded-full bg-[#174c3a] px-2.5 py-0.5 text-[10px] font-bold text-white shadow-xs">
-                          {rel.badge}
-                        </span>
-                      )}
-                      {relDiscount && (
-                        <span className="absolute right-2.5 top-2.5 z-10 rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-xs">
-                          {relDiscount}% OFF
-                        </span>
-                      )}
-                      <ProductCardImage
-                        src={
-                          rel.image_path ||
-                          (rel.images && rel.images[0]) ||
-                          null
-                        }
-                        alt={rel.name}
-                      />
-                    </div>
-
-                    <div className="flex flex-1 flex-col justify-between p-4">
-                      <div>
-                        {rel.category?.name && (
-                          <span className="text-[11px] font-medium text-[#6c8072]">
-                            {rel.category.name}
-                          </span>
-                        )}
-                        <h3 className="mt-1 line-clamp-2 text-sm font-semibold text-[#1a3325] group-hover:text-[#174c3a] transition-colors">
-                          {rel.name}
-                        </h3>
-                      </div>
-
-                      <div className="mt-3 flex items-baseline gap-2">
-                        <span className="text-base font-bold text-[#143e2b]">
-                          ${rel.price.toFixed(2)}
-                        </span>
-                        {rel.compare_at_price &&
-                          rel.compare_at_price > rel.price && (
-                            <span className="text-xs text-slate-400 line-through">
-                              ${rel.compare_at_price.toFixed(2)}
-                            </span>
-                          )}
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
+              {relatedProducts.map((rel) => (
+                <StoreProductCard key={rel.id} product={rel} showCategoryBadge={true} />
+              ))}
             </div>
           </section>
         )}

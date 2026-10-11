@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowRight, Eye, Layers, Package, Sparkles, Tag } from "lucide-react";
 import type { CategoryWithProducts } from "@/features/products/data/products";
 import type { ProductRecord } from "@/features/products/schemas/product.schema";
+import { StoreProductCard } from "../product/store-product-card";
 
 type CategoryProductsSectionProps = {
   categoriesWithProducts: CategoryWithProducts[];
@@ -250,68 +251,9 @@ export default function CategoryProductsSection({
                 {products.map((product) => (
                   <div
                     key={product.id}
-                    className="group relative flex min-w-[210px] xs:min-w-[230px] max-w-[250px] shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-[#e2eae0] bg-white transition-all duration-300 hover:border-[#b4cbb7] hover:shadow-[0_12px_36px_-12px_rgba(20,60,40,0.18)] sm:min-w-0 sm:max-w-none sm:w-full"
+                    className="min-w-[210px] xs:min-w-[230px] max-w-[250px] shrink-0 snap-start sm:min-w-0 sm:max-w-none sm:w-full"
                   >
-                    {/* Product Image Frame */}
-                    <div className="relative aspect-square sm:aspect-[4/5] w-full overflow-hidden bg-[#f6f9f5]">
-                      <CategoryCardImage
-                        src={product.image_path}
-                        alt={product.name}
-                      />
-
-                      {/* Top Badges */}
-                      <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5">
-                        {product.is_featured && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-[#1d4d38] shadow-sm backdrop-blur-sm sm:text-[10px]">
-                            <Sparkles className="size-2.5 text-amber-500" /> Featured
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Out of stock overlay */}
-                      {product.quantity <= 0 && (
-                        <div className="absolute inset-0 grid place-items-center bg-[#14231b]/40 backdrop-blur-[2px]">
-                          <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#8b2626]">
-                            Out of stock
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Product Details Block */}
-                    <div className="flex flex-1 flex-col justify-between p-3.5 sm:p-4">
-                      <div>
-                        <div className="flex items-center gap-1 text-[11px] text-[#788b7d]">
-                          <Tag className="size-2.5" /> {categorySection.name}
-                        </div>
-                        <h3 className="mt-1 line-clamp-1 text-sm font-semibold text-[#1c3325] transition-colors group-hover:text-[#174c3a]">
-                          {product.name}
-                        </h3>
-                        {product.product_description && (
-                          <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[#738779]">
-                            {product.product_description}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="mt-3.5 flex items-center justify-between border-t border-[#edf2ea] pt-3">
-                        <div>
-                          <p className="text-[10px] uppercase tracking-wider text-[#8c9c8f]">
-                            Price
-                          </p>
-                          <p className="text-sm font-bold text-[#173e2e] sm:text-base">
-                            ${Number(product.price).toFixed(2)}
-                          </p>
-                        </div>
-
-                        <Link
-                          href={`/product/${product.slug || product.id}`}
-                          className="inline-flex items-center gap-1 rounded-xl border border-[#d6e3d4] bg-[#f8faf7] px-3 py-1.5 text-xs font-semibold text-[#1c4d37] transition-all hover:border-[#174c3a] hover:bg-[#174c3a] hover:text-white"
-                        >
-                          <Eye className="size-3" /> View
-                        </Link>
-                      </div>
-                    </div>
+                    <StoreProductCard product={product} showCategoryBadge={false} />
                   </div>
                 ))}
               </div>

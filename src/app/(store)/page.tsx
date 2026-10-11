@@ -2,10 +2,14 @@ import { Leaf, ShieldCheck, Truck } from "lucide-react";
 import HeroCarousel from "@/components/store/home/hero-carousel";
 import FeaturedCarousel from "@/components/store/home/featured-carousel";
 import CategoryProductsSection from "@/components/store/home/category-products-section";
+import { StoreReviewsSection } from "@/components/store/home/store-reviews-section";
 import {
   getCachedFeaturedProducts,
   getCachedCategoriesWithProducts,
 } from "@/features/products/data/products";
+
+// ISR: revalidate homepage at most every 60s (plus instant Realtime refresh via client listener)
+export const revalidate = 60;
 
 export default async function HomePage() {
   const [featuredProducts, categoriesWithProducts] = await Promise.all([
@@ -30,7 +34,10 @@ export default async function HomePage() {
         />
       </div>
 
-      {/* 4. Brand Values & Customer Trust Pillars */}
+      {/* 4. Real Customer Reviews & Social Proof */}
+      <StoreReviewsSection />
+
+      {/* 5. Brand Values & Customer Trust Pillars */}
       <section className="border-t border-[#e8ece5] bg-[#fafbf8] py-12 sm:py-16">
         <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

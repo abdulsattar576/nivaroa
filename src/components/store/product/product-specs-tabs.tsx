@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CheckCircle2, FileText, ListFilter, Star } from "lucide-react";
 import type { ProductRecord } from "@/features/products/schemas/product.schema";
+import { RealProductReviews } from "./real-product-reviews";
 
 type ProductSpecsTabsProps = {
   product: ProductRecord;
@@ -139,33 +140,7 @@ export default function ProductSpecsTabs({ product }: ProductSpecsTabsProps) {
 
         {/* 3. Reviews */}
         {activeTab === "reviews" && (
-          <div className="space-y-6 text-[#293d31]">
-            <div className="flex flex-col gap-4 rounded-2xl border border-[#e5ede4] bg-[#fbfdfb] p-6 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-3xl font-extrabold text-[#173827]">
-                    {(product.rating || 5.0).toFixed(1)}
-                  </span>
-                  <div className="flex items-center gap-0.5 text-amber-500">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star key={star} className="size-4.5 fill-current" />
-                    ))}
-                  </div>
-                </div>
-                <p className="mt-1 text-xs text-[#63766a]">
-                  Based on {product.reviews_count || 1} verified customer ratings
-                </p>
-              </div>
-
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3.5 py-1.5 text-xs font-semibold text-emerald-800">
-                100% Recommended by buyers
-              </span>
-            </div>
-
-            <p className="text-xs text-[#7d8f82]">
-              Customer reviews are verified through order fulfillment.
-            </p>
-          </div>
+          <RealProductReviews productId={product.id} initialReviews={[]} />
         )}
       </div>
     </div>

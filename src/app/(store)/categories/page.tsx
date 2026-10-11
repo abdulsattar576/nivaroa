@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   description: "Browse all curated collections and categories at Nivaroa.",
 };
 
+// ISR: revalidate categories directory every 60 seconds
+export const revalidate = 60;
+
 export default async function CategoriesDirectoryPage() {
   const [categories, categoriesWithProducts] = await Promise.all([
     getCachedCategories(),

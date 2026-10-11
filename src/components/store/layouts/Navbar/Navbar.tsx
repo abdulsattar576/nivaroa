@@ -9,6 +9,7 @@ import { getCachedCategories } from "@/features/categories/data/categories";
 import { getCurrentUser } from "@/lib/proxy";
 import UserNav from "./user-nav";
 import CartBadge from "./cart-badge";
+import { SearchButton } from "./search-button";
 
 const Navbar = async () => {
   const { logo } = Images;
@@ -39,13 +40,7 @@ const Navbar = async () => {
           </nav>
 
           <div className="flex shrink-0 items-center gap-2.5">
-            <button
-              type="button"
-              aria-label="Search"
-              className="grid size-10 place-items-center rounded-xl text-[#35493b] transition-all duration-200 hover:bg-[#ebf2e8] hover:text-[#174c3a]"
-            >
-              <Search className="size-5" aria-hidden="true" />
-            </button>
+            <SearchButton />
             <CartBadge />
 
             {/* Desktop User Account Nav */}
@@ -62,13 +57,7 @@ const Navbar = async () => {
             <span className="text-[1.15rem] font-semibold tracking-[0.15em] text-[#193225]">NIVAROA</span>
           </Link>
           <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              aria-label="Search"
-              className="grid size-9 place-items-center rounded-xl text-[#35493b] transition hover:bg-[#ebf2e8]"
-            >
-              <Search className="size-4.5" aria-hidden="true" />
-            </button>
+            <SearchButton isMobile />
             <CartBadge isMobile />
 
             {/* Mobile User Account Nav */}

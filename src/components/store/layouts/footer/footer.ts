@@ -10,10 +10,10 @@ export function buildFooterSections(categories: CategoryRecord[] = []): FooterSe
           link: `/shop?category=${encodeURIComponent(cat.slug)}`,
         }))
       : [
-          { name: "Men", link: "/shop?category=men" },
-          { name: "Women", link: "/shop?category=women" },
           { name: "Clothes", link: "/shop?category=clothes" },
           { name: "Electronics", link: "/shop?category=electronics" },
+          { name: "Men", link: "/shop?category=men" },
+          { name: "Women", link: "/shop?category=women" },
         ];
 
   return [
@@ -25,17 +25,18 @@ export function buildFooterSections(categories: CategoryRecord[] = []): FooterSe
       heading: "Navigation",
       links: [
         { name: "Home", link: "/" },
-        { name: "About", link: "/about" },
-        { name: "Services", link: "/services" },
+        { name: "About Us", link: "/about" },
+        { name: "Contact Support", link: "/contact" },
+        { name: "Our Services", link: "/services" },
       ],
     },
     {
       heading: "Policy",
       links: [
+        { name: "Privacy Policy", link: "/privacy" },
+        { name: "Terms & Conditions", link: "/terms" },
         { name: "Payment Information", link: "/payment-info" },
-        { name: "Privacy Policy", link: "/privacy-policy" },
         { name: "Replacement & Warranty", link: "/replacement-and-warranty" },
-        { name: "Warranty by Nivaroa", link: "/nivaroa-warranty" },
       ],
     },
   ];

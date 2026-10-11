@@ -303,7 +303,7 @@ export default function HeroCarousel({ featuredProducts }: HeroCarouselProps) {
               type="button"
               onClick={handlePrev}
               aria-label="Previous slide"
-              className="absolute left-2 top-1/2 z-20 grid size-8 -translate-y-1/2 place-items-center rounded-full border border-white/70 bg-white/90 text-[#1a3828] shadow-md backdrop-blur-md transition-all hover:scale-105 hover:bg-white active:scale-95 sm:left-4 sm:size-10 md:left-5 md:size-11"
+              className="absolute left-2 right-4 top-1/2 z-20 grid size-8 -translate-y-1/2 place-items-center rounded-full border border-white/70 bg-white/90 text-[#1a3828] shadow-md backdrop-blur-md transition-all hover:scale-105 hover:bg-white active:scale-95 sm:left-4 sm:size-10 md:left-5 md:size-11"
             >
               <ChevronLeft className="size-4 sm:size-5 md:size-6" />
             </button>

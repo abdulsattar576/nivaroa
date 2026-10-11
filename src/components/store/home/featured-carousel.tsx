@@ -12,6 +12,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import type { ProductRecord } from "@/features/products/schemas/product.schema";
+import { StoreProductCard } from "../product/store-product-card";
 
 type FeaturedCarouselProps = {
   products: ProductRecord[];
@@ -174,65 +175,8 @@ export default function FeaturedCarousel({ products }: FeaturedCarouselProps) {
               key={product.id}
               className="pl-3 basis-[75%] xs:basis-[68%] sm:basis-1/2 sm:pl-5 md:basis-1/3 lg:basis-1/4"
             >
-              <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#e4ece2] bg-white transition-all duration-300 hover:border-[#b9cebb] hover:shadow-[0_12px_36px_-12px_rgba(23,76,58,0.18)]">
-                {/* Product Image Frame */}
-                <div className="relative aspect-square sm:aspect-[4/5] w-full overflow-hidden bg-[#f6f9f5]">
-                  <CardProductImage
-                    src={product.image_path}
-                    alt={product.name}
-                  />
-
-                  {/* Top Badges */}
-                  <div className="absolute left-2.5 top-2.5 sm:left-3 sm:top-3 flex flex-wrap gap-1.5">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-[#1d4d38] shadow-sm backdrop-blur-sm">
-                      <Sparkles className="size-2.5" /> Featured
-                    </span>
-                    {product.category && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-[#174c3a]/90 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-medium text-white shadow-sm backdrop-blur-sm">
-                        <Tag className="size-2.5" /> {product.category.name}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Stock status indicator */}
-                  {product.quantity <= 0 && (
-                    <div className="absolute inset-0 grid place-items-center bg-[#14231b]/40 backdrop-blur-[2px]">
-                      <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#8b2626]">
-                        Out of stock
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Product Info */}
-                <div className="flex flex-1 flex-col justify-between p-3.5 sm:p-5">
-                  <div>
-                    <h3 className="line-clamp-1 text-sm font-semibold text-[#1c3325] transition-colors group-hover:text-[#174c3a] sm:text-base">
-                      {product.name}
-                    </h3>
-                    {product.product_description && (
-                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[#748779]">
-                        {product.product_description}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="mt-3.5 flex items-center justify-between border-t border-[#edf2ea] pt-3 sm:mt-4">
-                    <div>
-                      <p className="text-[11px] text-[#8c9c8f] sm:text-xs">Price</p>
-                      <p className="text-sm font-semibold text-[#173e2e] sm:text-base">
-                        ${Number(product.price).toFixed(2)}
-                      </p>
-                    </div>
-
-                    <Link
-                      href={`/product/${product.slug || product.id}`}
-                      className="rounded-xl border border-[#d6e3d4] bg-[#f8faf7] px-3 py-1.5 text-xs font-semibold text-[#1c4d37] transition-all hover:border-[#174c3a] hover:bg-[#174c3a] hover:text-white sm:px-3.5"
-                    >
-                      View
-                    </Link>
-                  </div>
-                </div>
+              <div className="h-full">
+                <StoreProductCard product={product} showCategoryBadge={true} />
               </div>
             </CarouselItem>
           ))}
