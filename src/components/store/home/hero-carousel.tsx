@@ -109,12 +109,13 @@ export default function HeroCarousel({ featuredProducts }: HeroCarouselProps) {
   const [isPaused, setIsPaused] = useState(false);
 
   // Fallback slides in case database has few or no featured products yet
-  const slides =
+  const slides: ProductRecord[] =
     featuredProducts.length > 0
       ? featuredProducts.slice(0, 6)
       : [
           {
             id: "fallback-1",
+            slug: "minimalist-overshirt",
             name: "Minimalist Overshirt in Heavy Cotton",
             price: 68.0,
             quantity: 24,
@@ -129,6 +130,7 @@ export default function HeroCarousel({ featuredProducts }: HeroCarouselProps) {
           },
           {
             id: "fallback-2",
+            slug: "everyday-structured-leather-tote",
             name: "Everyday Structured Leather Tote",
             price: 120.0,
             quantity: 15,
@@ -248,7 +250,7 @@ export default function HeroCarousel({ featuredProducts }: HeroCarouselProps) {
                       <div className="mt-5 flex flex-wrap items-center gap-2.5 sm:mt-7 sm:gap-3.5">
                         <Button
                           size="lg"
-                          render={<Link href={`/shop?product=${product.id}`} />}
+                          render={<Link href={`/product/${product.slug || product.id}`} />}
                           className="h-10 rounded-xl bg-[#174c3a] px-5 text-xs font-semibold text-white shadow-md transition hover:scale-[1.02] hover:bg-[#103d31] sm:h-12 sm:rounded-2xl sm:px-7 sm:text-sm"
                         >
                           <ShoppingBag className="size-3.5 sm:size-4" /> Shop Now

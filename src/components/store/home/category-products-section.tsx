@@ -305,7 +305,7 @@ export default function CategoryProductsSection({
                         </div>
 
                         <Link
-                          href={`/shop?product=${product.id}`}
+                          href={`/product/${product.slug || product.id}`}
                           className="inline-flex items-center gap-1 rounded-xl border border-[#d6e3d4] bg-[#f8faf7] px-3 py-1.5 text-xs font-semibold text-[#1c4d37] transition-all hover:border-[#174c3a] hover:bg-[#174c3a] hover:text-white"
                         >
                           <Eye className="size-3" /> View

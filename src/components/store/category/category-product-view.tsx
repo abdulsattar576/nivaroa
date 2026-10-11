@@ -243,7 +243,10 @@ export default function CategoryProductView({
               className="group relative flex flex-col overflow-hidden rounded-2xl border border-[#e2eae0] bg-white transition-all duration-300 hover:border-[#b4cbb7] hover:shadow-[0_12px_36px_-12px_rgba(20,60,40,0.18)]"
             >
               {/* Product Image Frame */}
-              <div className="relative aspect-square sm:aspect-[4/5] w-full overflow-hidden bg-[#f6f9f5]">
+              <Link
+                href={`/product/${product.slug || product.id}`}
+                className="relative aspect-square sm:aspect-[4/5] w-full overflow-hidden bg-[#f6f9f5] block"
+              >
                 <ProductCardImage
                   src={product.image_path}
                   alt={product.name}
@@ -256,6 +259,11 @@ export default function CategoryProductView({
                       <Sparkles className="size-2.5 text-amber-500" /> Featured
                     </span>
                   )}
+                  {product.badge && (
+                    <span className="inline-flex items-center rounded-full bg-[#174c3a] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-white shadow-sm sm:text-[10px]">
+                      {product.badge}
+                    </span>
+                  )}
                 </div>
 
                 {/* Out of stock overlay */}
@@ -266,7 +274,7 @@ export default function CategoryProductView({
                     </span>
                   </div>
                 )}
-              </div>
+              </Link>
 
               {/* Product Details Block */}
               <div className="flex flex-1 flex-col justify-between p-3.5 sm:p-4">
@@ -274,9 +282,11 @@ export default function CategoryProductView({
                   <div className="flex items-center gap-1 text-[11px] text-[#788b7d]">
                     <Tag className="size-2.5" /> {category.name}
                   </div>
-                  <h4 className="mt-1 line-clamp-1 text-sm font-semibold text-[#1c3325] transition-colors group-hover:text-[#174c3a] sm:text-base">
-                    {product.name}
-                  </h4>
+                  <Link href={`/product/${product.slug || product.id}`}>
+                    <h4 className="mt-1 line-clamp-1 text-sm font-semibold text-[#1c3325] transition-colors group-hover:text-[#174c3a] sm:text-base">
+                      {product.name}
+                    </h4>
+                  </Link>
                   {product.product_description && (
                     <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[#738779]">
                       {product.product_description}
@@ -289,13 +299,20 @@ export default function CategoryProductView({
                     <p className="text-[10px] uppercase tracking-wider text-[#8c9c8f]">
                       Price
                     </p>
-                    <p className="text-sm font-bold text-[#173e2e] sm:text-base">
-                      ${Number(product.price).toFixed(2)}
-                    </p>
+                    <div className="flex items-baseline gap-1.5">
+                      <p className="text-sm font-bold text-[#173e2e] sm:text-base">
+                        ${Number(product.price).toFixed(2)}
+                      </p>
+                      {product.compare_at_price && product.compare_at_price > product.price && (
+                        <p className="text-[11px] text-slate-400 line-through">
+                          ${Number(product.compare_at_price).toFixed(2)}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   <Link
-                    href={`/shop?product=${product.id}`}
+                    href={`/product/${product.slug || product.id}`}
                     className="inline-flex items-center gap-1 rounded-xl border border-[#d6e3d4] bg-[#f8faf7] px-3 py-1.5 text-xs font-semibold text-[#1c4d37] transition-all hover:border-[#174c3a] hover:bg-[#174c3a] hover:text-white"
                   >
                     <Eye className="size-3" /> View

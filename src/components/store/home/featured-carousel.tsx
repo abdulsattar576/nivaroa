@@ -226,7 +226,7 @@ export default function FeaturedCarousel({ products }: FeaturedCarouselProps) {
                     </div>
 
                     <Link
-                      href={`/shop?product=${product.id}`}
+                      href={`/product/${product.slug || product.id}`}
                       className="rounded-xl border border-[#d6e3d4] bg-[#f8faf7] px-3 py-1.5 text-xs font-semibold text-[#1c4d37] transition-all hover:border-[#174c3a] hover:bg-[#174c3a] hover:text-white sm:px-3.5"
                     >
                       View

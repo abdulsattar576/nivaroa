@@ -107,19 +107,26 @@ export default async function AdminProductsPage() {
                             )}
                           </div>
                           <div className="min-w-0">
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                               <p className="font-semibold text-[#22352a]">{p.name}</p>
                               {p.is_featured && (
                                 <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-amber-600/20">
                                   <Sparkles className="size-2.5" /> Featured
                                 </span>
                               )}
+                              {p.badge && (
+                                <span className="inline-flex rounded-full bg-[#174c3a] px-2 py-0.5 text-[10px] font-semibold text-white">
+                                  {p.badge}
+                                </span>
+                              )}
                             </div>
-                            {p.product_description && (
-                              <p className="mt-0.5 line-clamp-1 text-xs text-[#828f85]">
-                                {p.product_description}
-                              </p>
-                            )}
+                            <div className="flex items-center gap-2 text-xs text-[#828f85]">
+                              {p.sku && <span className="font-mono">SKU: {p.sku}</span>}
+                              {p.sku && p.product_description && <span>•</span>}
+                              {p.product_description && (
+                                <p className="line-clamp-1">{p.product_description}</p>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </td>
@@ -137,7 +144,14 @@ export default async function AdminProductsPage() {
 
                       {/* Price */}
                       <td className="px-5 py-4 font-semibold text-[#1e3427]">
-                        ${Number(p.price).toFixed(2)}
+                        <div className="flex items-baseline gap-1.5">
+                          <span>${Number(p.price).toFixed(2)}</span>
+                          {p.compare_at_price && p.compare_at_price > p.price && (
+                            <span className="text-xs font-normal text-slate-400 line-through">
+                              ${Number(p.compare_at_price).toFixed(2)}
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       {/* Stock */}
@@ -158,6 +172,13 @@ export default async function AdminProductsPage() {
                       {/* Actions */}
                       <td className="px-5 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/product/${p.slug || p.id}`}
+                            target="_blank"
+                            className="inline-flex h-8 items-center rounded-lg border border-[#dbe4dc] px-2.5 text-xs font-medium text-[#2b4134] hover:bg-[#ebf2ea]"
+                          >
+                            Live
+                          </Link>
                           <Button
                             variant="outline"
                             size="sm"

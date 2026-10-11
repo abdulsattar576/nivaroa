@@ -81,13 +81,59 @@ export async function createProduct(formData: FormData) {
   const { supabase, message } = await getAdminClient();
   if (!supabase) return { success: false as const, message: message! };
 
+  // Parse highlights from newline-separated string
+  const highlightsRaw = (formData.get("highlights") as string) || "";
+  const highlights = highlightsRaw
+    ? highlightsRaw
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+
+  // Parse specifications from JSON or "Key: Value" format
+  let specifications: Record<string, string> = {};
+  const specsRaw = (formData.get("specifications") as string) || "";
+  if (specsRaw) {
+    try {
+      specifications = JSON.parse(specsRaw);
+    } catch {
+      specsRaw.split("\n").forEach((line) => {
+        const [k, ...v] = line.split(":");
+        if (k && v.length) {
+          specifications[k.trim()] = v.join(":").trim();
+        }
+      });
+    }
+  }
+
+  // Parse additional image URLs
+  const imagesRaw = (formData.get("images") as string) || "";
+  let images = imagesRaw
+    ? imagesRaw
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+
+  const comparePriceRaw = formData.get("compare_at_price");
+
   const rawData: Record<string, unknown> = {
     name: (formData.get("name") as string) || "",
+    slug: (formData.get("slug") as string) || "",
     price: Number(formData.get("price")),
+    compare_at_price:
+      comparePriceRaw && !isNaN(Number(comparePriceRaw))
+        ? Number(comparePriceRaw)
+        : null,
     category_id: (formData.get("category_id") as string) || "",
     quantity: Number(formData.get("quantity") || 0),
+    sku: (formData.get("sku") as string) || "",
+    badge: (formData.get("badge") as string) || "",
     product_description: (formData.get("product_description") as string) || "",
     image_path: (formData.get("image_path") as string) || "",
+    images,
+    highlights,
+    specifications,
     is_featured: formData.get("is_featured") === "true",
   };
 
@@ -116,18 +162,32 @@ export async function createProduct(formData: FormData) {
     finalImagePath = uploadResult.url;
   }
 
+  // Ensure finalImagePath is part of images array
+  if (finalImagePath && !images.includes(finalImagePath)) {
+    images = [finalImagePath, ...images];
+  } else if (!finalImagePath && images.length > 0) {
+    finalImagePath = images[0];
+  }
+
   const { data, error } = await supabase
     .from("products")
     .insert({
       name: validation.data.name,
+      slug: validation.data.slug || undefined,
       price: validation.data.price,
+      compare_at_price: validation.data.compare_at_price || null,
       category_id: validation.data.category_id || null,
       quantity: validation.data.quantity,
+      sku: validation.data.sku || null,
+      badge: validation.data.badge || null,
       product_description: validation.data.product_description || null,
       image_path: finalImagePath,
+      images,
+      highlights: validation.data.highlights || [],
+      specifications: validation.data.specifications || {},
       is_featured: validation.data.is_featured,
     })
-    .select("id")
+    .select("id, slug")
     .single();
 
   if (error) {
@@ -144,11 +204,14 @@ export async function createProduct(formData: FormData) {
   revalidatePath("/admin/product");
   revalidatePath("/admin/add-product");
   revalidatePath("/shop");
+  revalidatePath("/product", "layout");
+  revalidatePath("/categories", "layout");
 
   return {
     success: true as const,
     message: "Product created successfully.",
     id: data.id,
+    slug: data.slug,
   };
 }
 
@@ -163,13 +226,59 @@ export async function updateProduct(id: string, formData: FormData) {
   const { supabase, message } = await getAdminClient();
   if (!supabase) return { success: false as const, message: message! };
 
+  // Parse highlights from newline-separated string
+  const highlightsRaw = (formData.get("highlights") as string) || "";
+  const highlights = highlightsRaw
+    ? highlightsRaw
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+
+  // Parse specifications from JSON or "Key: Value" format
+  let specifications: Record<string, string> = {};
+  const specsRaw = (formData.get("specifications") as string) || "";
+  if (specsRaw) {
+    try {
+      specifications = JSON.parse(specsRaw);
+    } catch {
+      specsRaw.split("\n").forEach((line) => {
+        const [k, ...v] = line.split(":");
+        if (k && v.length) {
+          specifications[k.trim()] = v.join(":").trim();
+        }
+      });
+    }
+  }
+
+  // Parse additional image URLs
+  const imagesRaw = (formData.get("images") as string) || "";
+  let images = imagesRaw
+    ? imagesRaw
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+
+  const comparePriceRaw = formData.get("compare_at_price");
+
   const rawData: Record<string, unknown> = {
     name: (formData.get("name") as string) || "",
+    slug: (formData.get("slug") as string) || "",
     price: Number(formData.get("price")),
+    compare_at_price:
+      comparePriceRaw && !isNaN(Number(comparePriceRaw))
+        ? Number(comparePriceRaw)
+        : null,
     category_id: (formData.get("category_id") as string) || "",
     quantity: Number(formData.get("quantity") || 0),
+    sku: (formData.get("sku") as string) || "",
+    badge: (formData.get("badge") as string) || "",
     product_description: (formData.get("product_description") as string) || "",
     image_path: (formData.get("image_path") as string) || "",
+    images,
+    highlights,
+    specifications,
     is_featured: formData.get("is_featured") === "true",
   };
 
@@ -198,15 +307,29 @@ export async function updateProduct(id: string, formData: FormData) {
     finalImagePath = uploadResult.url;
   }
 
+  // Ensure finalImagePath is part of images array
+  if (finalImagePath && !images.includes(finalImagePath)) {
+    images = [finalImagePath, ...images];
+  } else if (!finalImagePath && images.length > 0) {
+    finalImagePath = images[0];
+  }
+
   const { error } = await supabase
     .from("products")
     .update({
       name: validation.data.name,
+      slug: validation.data.slug || undefined,
       price: validation.data.price,
+      compare_at_price: validation.data.compare_at_price || null,
       category_id: validation.data.category_id || null,
       quantity: validation.data.quantity,
+      sku: validation.data.sku || null,
+      badge: validation.data.badge || null,
       product_description: validation.data.product_description || null,
       image_path: finalImagePath,
+      images,
+      highlights: validation.data.highlights || [],
+      specifications: validation.data.specifications || {},
       is_featured: validation.data.is_featured,
       updated_at: new Date().toISOString(),
     })
@@ -228,6 +351,8 @@ export async function updateProduct(id: string, formData: FormData) {
   revalidatePath(`/admin/products/${id}/edit`);
   revalidatePath(`/admin/product/${id}/edit`);
   revalidatePath("/shop");
+  revalidatePath("/product", "layout");
+  revalidatePath("/categories", "layout");
 
   return {
     success: true as const,

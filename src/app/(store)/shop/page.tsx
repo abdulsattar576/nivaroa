@@ -16,10 +16,14 @@ type ShopPageProps = {
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const resolvedParams = await searchParams;
   const categorySlug = resolvedParams?.category as string | undefined;
+  const productId = resolvedParams?.product as string | undefined;
 
-  // Seamlessly forward query param requests to the dedicated dynamic category route
+  // Seamlessly forward query param requests to dedicated dynamic routes
   if (categorySlug) {
     redirect(`/categories/${encodeURIComponent(categorySlug)}`);
+  }
+  if (productId) {
+    redirect(`/product/${encodeURIComponent(productId)}`);
   }
 
   const [{ products }, allCategories] = await Promise.all([

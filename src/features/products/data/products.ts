@@ -14,6 +14,58 @@ function getPublicSupabaseClient() {
   return createSupabaseClient(url, key);
 }
 
+export const PRODUCT_SELECT_FIELDS = `
+  id,
+  name,
+  slug,
+  price,
+  compare_at_price,
+  category_id,
+  image_path,
+  images,
+  product_description,
+  quantity,
+  sku,
+  badge,
+  highlights,
+  specifications,
+  rating,
+  reviews_count,
+  is_featured,
+  created_at,
+  updated_at,
+  category:categories(id, name, slug)
+`;
+
+export function mapProductRecord(item: any): ProductRecord {
+  const images =
+    Array.isArray(item.images) && item.images.length > 0
+      ? item.images
+      : item.image_path
+      ? [item.image_path]
+      : [];
+
+  return {
+    ...item,
+    slug: item.slug || item.id,
+    price: Number(item.price),
+    compare_at_price:
+      item.compare_at_price != null ? Number(item.compare_at_price) : null,
+    images,
+    highlights: Array.isArray(item.highlights) ? item.highlights : [],
+    specifications:
+      typeof item.specifications === "object" && item.specifications !== null
+        ? item.specifications
+        : {},
+    rating: item.rating != null ? Number(item.rating) : 5.0,
+    reviews_count: item.reviews_count != null ? Number(item.reviews_count) : 0,
+    is_featured: Boolean(item.is_featured),
+    category: Array.isArray(item.category)
+      ? item.category[0] ?? null
+      : item.category ?? null,
+  };
+}
+
 export async function getProducts(): Promise<{
   products: ProductRecord[];
   error: string | null;
@@ -22,33 +74,14 @@ export async function getProducts(): Promise<{
 
   const { data, error } = await supabase
     .from("products")
-    .select(`
-      id,
-      name,
-      price,
-      category_id,
-      image_path,
-      product_description,
-      quantity,
-      is_featured,
-      created_at,
-      updated_at,
-      category:categories(id, name, slug)
-    `)
+    .select(PRODUCT_SELECT_FIELDS)
     .order("created_at", { ascending: false });
 
   if (error) {
     return { products: [], error: "Products could not be loaded." };
   }
 
-  // Safely map Supabase response
-  const products = (data ?? []).map((item: any) => ({
-    ...item,
-    price: Number(item.price),
-    is_featured: Boolean(item.is_featured),
-    category: Array.isArray(item.category) ? item.category[0] ?? null : item.category ?? null,
-  })) as ProductRecord[];
-
+  const products = (data ?? []).map(mapProductRecord);
   return { products, error: null };
 }
 
@@ -57,31 +90,129 @@ export async function getProductById(id: string): Promise<ProductRecord | null> 
 
   const { data, error } = await supabase
     .from("products")
-    .select(`
-      id,
-      name,
-      price,
-      category_id,
-      image_path,
-      product_description,
-      quantity,
-      is_featured,
-      created_at,
-      updated_at,
-      category:categories(id, name, slug)
-    `)
+    .select(PRODUCT_SELECT_FIELDS)
     .eq("id", id)
     .maybeSingle();
 
   if (error || !data) return null;
 
-  return {
-    ...data,
-    price: Number(data.price),
-    is_featured: Boolean(data.is_featured),
-    category: Array.isArray(data.category) ? data.category[0] ?? null : data.category ?? null,
-  } as ProductRecord;
+  return mapProductRecord(data);
 }
+
+/**
+ * Retrieves a product by slug or UUID id fallback
+ */
+export async function getProductBySlug(slugOrId: string): Promise<ProductRecord | null> {
+  const supabase = getPublicSupabaseClient();
+
+  // Try by slug first
+  let { data } = await supabase
+    .from("products")
+    .select(PRODUCT_SELECT_FIELDS)
+    .eq("slug", slugOrId)
+    .maybeSingle();
+
+  // If not found and looks like UUID, fallback to id
+  if (
+    !data &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      slugOrId
+    )
+  ) {
+    const res = await supabase
+      .from("products")
+      .select(PRODUCT_SELECT_FIELDS)
+      .eq("id", slugOrId)
+      .maybeSingle();
+    data = res.data;
+  }
+
+  if (!data) return null;
+  return mapProductRecord(data);
+}
+
+/**
+ * Cached product retrieval by slug for high-speed page loads
+ */
+export const getCachedProductBySlug = (slugOrId: string) =>
+  unstable_cache(
+    async (): Promise<ProductRecord | null> => {
+      return getProductBySlug(slugOrId);
+    },
+    [`product-slug-${slugOrId}`],
+    {
+      tags: ["products", `product-${slugOrId}`],
+      revalidate: 3600,
+    }
+  )();
+
+/**
+ * Returns all product slugs for static path pre-rendering
+ */
+export async function getAllProductSlugs(): Promise<string[]> {
+  try {
+    const supabase = getPublicSupabaseClient();
+    const { data } = await supabase.from("products").select("slug");
+    return (data || []).map((p: any) => p.slug).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Fetches related products from the same category or featured products
+ */
+export async function getRelatedProducts(
+  categoryId: string | null,
+  currentProductId: string,
+  limit = 4
+): Promise<ProductRecord[]> {
+  try {
+    const supabase = getPublicSupabaseClient();
+    let query = supabase
+      .from("products")
+      .select(PRODUCT_SELECT_FIELDS)
+      .neq("id", currentProductId)
+      .limit(limit);
+
+    if (categoryId) {
+      query = query.eq("category_id", categoryId);
+    } else {
+      query = query.eq("is_featured", true);
+    }
+
+    const { data } = await query;
+    if (!data || data.length === 0) {
+      // Fallback: any other active products
+      const fallback = await supabase
+        .from("products")
+        .select(PRODUCT_SELECT_FIELDS)
+        .neq("id", currentProductId)
+        .limit(limit);
+      return (fallback.data || []).map(mapProductRecord);
+    }
+
+    return data.map(mapProductRecord);
+  } catch {
+    return [];
+  }
+}
+
+export const getCachedRelatedProducts = (
+  categoryId: string | null,
+  currentProductId: string,
+  limit = 4
+) =>
+  unstable_cache(
+    async (): Promise<ProductRecord[]> => {
+      return getRelatedProducts(categoryId, currentProductId, limit);
+    },
+    [`related-${currentProductId}`],
+    {
+      tags: ["products", `related-${currentProductId}`],
+      revalidate: 3600,
+    }
+  )();
 
 /**
  * Fetches featured products for homepage carousel and highlights
@@ -91,36 +222,18 @@ export async function getFeaturedProducts(limit = 8): Promise<ProductRecord[]> {
 
   const { data, error } = await supabase
     .from("products")
-    .select(`
-      id,
-      name,
-      price,
-      category_id,
-      image_path,
-      product_description,
-      quantity,
-      is_featured,
-      created_at,
-      updated_at,
-      category:categories(id, name, slug)
-    `)
+    .select(PRODUCT_SELECT_FIELDS)
     .eq("is_featured", true)
     .order("created_at", { ascending: false })
     .limit(limit);
 
   if (error || !data) return [];
 
-  return data.map((item: any) => ({
-    ...item,
-    price: Number(item.price),
-    is_featured: Boolean(item.is_featured),
-    category: Array.isArray(item.category) ? item.category[0] ?? null : item.category ?? null,
-  })) as ProductRecord[];
+  return data.map(mapProductRecord);
 }
 
 /**
  * Returns cached featured products for public homepage and storefront highlights.
- * Uses Next.js unstable_cache with tag 'featured-products' to prevent unnecessary API calls.
  */
 export const getCachedFeaturedProducts = unstable_cache(
   async (limit = 10): Promise<ProductRecord[]> => {
@@ -128,31 +241,14 @@ export const getCachedFeaturedProducts = unstable_cache(
       const supabase = getPublicSupabaseClient();
       const { data, error } = await supabase
         .from("products")
-        .select(`
-          id,
-          name,
-          price,
-          category_id,
-          image_path,
-          product_description,
-          quantity,
-          is_featured,
-          created_at,
-          updated_at,
-          category:categories(id, name, slug)
-        `)
+        .select(PRODUCT_SELECT_FIELDS)
         .eq("is_featured", true)
         .order("created_at", { ascending: false })
         .limit(limit);
 
       if (error || !data) return [];
 
-      return data.map((item: any) => ({
-        ...item,
-        price: Number(item.price),
-        is_featured: Boolean(item.is_featured),
-        category: Array.isArray(item.category) ? item.category[0] ?? null : item.category ?? null,
-      })) as ProductRecord[];
+      return data.map(mapProductRecord);
     } catch {
       return [];
     }
@@ -173,14 +269,12 @@ export type CategoryWithProducts = {
 
 /**
  * Returns categories that have products, with up to `limitPerCategory` products each.
- * Cached via unstable_cache with 'categories' and 'products' tags to prevent redundant database queries.
  */
 export const getCachedCategoriesWithProducts = unstable_cache(
   async (limitPerCategory = 5): Promise<CategoryWithProducts[]> => {
     try {
       const supabase = getPublicSupabaseClient();
 
-      // Query categories with their nested products
       const { data: categories, error: catError } = await supabase
         .from("categories")
         .select(`
@@ -188,43 +282,23 @@ export const getCachedCategoriesWithProducts = unstable_cache(
           name,
           slug,
           products (
-            id,
-            name,
-            price,
-            quantity,
-            image_path,
-            product_description,
-            is_featured,
-            created_at,
-            updated_at
+            ${PRODUCT_SELECT_FIELDS}
           )
         `)
         .order("name", { ascending: true });
 
       if (catError || !categories) {
-        // Fallback: fetch products directly and group by category
         const { data: products } = await supabase
           .from("products")
-          .select(`
-            id,
-            name,
-            price,
-            quantity,
-            image_path,
-            product_description,
-            is_featured,
-            created_at,
-            updated_at,
-            category_id,
-            category:categories(id, name, slug)
-          `)
+          .select(PRODUCT_SELECT_FIELDS)
           .order("created_at", { ascending: false });
 
         if (!products || products.length === 0) return [];
 
         const groupMap = new Map<string, CategoryWithProducts>();
         for (const p of products) {
-          const cat = Array.isArray(p.category) ? p.category[0] : p.category;
+          const mapped = mapProductRecord(p);
+          const cat = mapped.category;
           if (!cat) continue;
           if (!groupMap.has(cat.id)) {
             groupMap.set(cat.id, {
@@ -236,12 +310,7 @@ export const getCachedCategoriesWithProducts = unstable_cache(
           }
           const group = groupMap.get(cat.id)!;
           if (group.products.length < limitPerCategory) {
-            group.products.push({
-              ...p,
-              price: Number(p.price),
-              is_featured: Boolean(p.is_featured),
-              category: cat,
-            } as ProductRecord);
+            group.products.push(mapped);
           }
         }
         return Array.from(groupMap.values());
@@ -252,7 +321,6 @@ export const getCachedCategoriesWithProducts = unstable_cache(
         const rawProducts = (cat.products as any[]) || [];
         if (rawProducts.length === 0) continue;
 
-        // Sort latest first and slice limitPerCategory (5)
         const sorted = rawProducts
           .sort(
             (a, b) =>
@@ -261,12 +329,10 @@ export const getCachedCategoriesWithProducts = unstable_cache(
           )
           .slice(0, limitPerCategory)
           .map((p) => ({
-            ...p,
-            price: Number(p.price),
-            is_featured: Boolean(p.is_featured),
+            ...mapProductRecord(p),
             category_id: cat.id,
             category: { id: cat.id, name: cat.name, slug: cat.slug },
-          })) as ProductRecord[];
+          }));
 
         result.push({
           id: cat.id,
@@ -295,32 +361,13 @@ export async function getProductsByCategory(
     const supabase = getPublicSupabaseClient();
     const { data, error } = await supabase
       .from("products")
-      .select(`
-        id,
-        name,
-        price,
-        quantity,
-        image_path,
-        product_description,
-        is_featured,
-        created_at,
-        updated_at,
-        category_id,
-        category:categories(id, name, slug)
-      `)
+      .select(PRODUCT_SELECT_FIELDS)
       .eq("category_id", categoryId)
       .order("created_at", { ascending: false });
 
     if (error || !data) return [];
 
-    return data.map((item: any) => ({
-      ...item,
-      price: Number(item.price),
-      is_featured: Boolean(item.is_featured),
-      category: Array.isArray(item.category)
-        ? item.category[0] ?? null
-        : item.category ?? null,
-    })) as ProductRecord[];
+    return data.map(mapProductRecord);
   } catch {
     return [];
   }
@@ -337,5 +384,3 @@ export const getCachedProductsByCategory = (categoryId: string) =>
       revalidate: 3600,
     }
   )();
-
-
