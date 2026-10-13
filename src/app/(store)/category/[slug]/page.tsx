@@ -1,2 +1,5 @@
-export { default, generateMetadata, generateStaticParams, revalidate, dynamicParams } from "../../categories/[slug]/page";
+export const revalidate = 60;
+export const dynamicParams = true;
+
+export { default, generateMetadata, generateStaticParams } from "../../categories/[slug]/page";
 
